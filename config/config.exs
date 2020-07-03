@@ -14,8 +14,9 @@ config :loggregate,
 config :loggregate, LoggregateWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "7O7qqAqsTBL2c7Y0+8mBM2gLqQkUPBm0trBcpHsoh2ZprTBQeUfFJkh353+25yam",
+  live_view: [signing_salt: "HipaJWD0AOxWMVJc/EzWT1SVv7eglA5ucsIEDVnWCz8HhjzGpHBtCOwa18B4qE+Q"],
   render_errors: [view: LoggregateWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Loggregate.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub_server: Loggregate.PubSub
 
 # Configures Elixir's Logger
 config :logger, :console,

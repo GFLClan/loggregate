@@ -17,7 +17,8 @@ defmodule Loggregate.Application do
       # Starts a worker by calling: Loggregate.Worker.start_link(arg)
       # {Loggregate.Worker, arg},
       {Loggregate.LogReceiver.UdpListener, 26015},
-      {Loggregate.LogReceiver.LogIngestProducer, []}
+      {Loggregate.LogReceiver.LogIngestProducer, []},
+      {Phoenix.PubSub, [name: Loggregate.PubSub, adapter: Phoenix.PubSub.PG2]}
     ]
 
     children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogIngestWorker, [], id: i)
