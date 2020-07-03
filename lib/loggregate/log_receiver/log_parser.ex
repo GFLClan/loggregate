@@ -10,9 +10,10 @@ defmodule Loggregate.LogReceiver.LogParser do
     {timestamp, parse_message(message)}
   end
 
-  @cvar_regex ~r/^\"(\w+)\" = \"(\w+)\"$/
-  @server_cvar_regex ~r/^server_cvar: \"(\w+)\" \"(\w+)\"$/
-  @say_regex ~r/^\"(.+)<\d+><([\w:]+)><\w+>\" (?:say|say_team) \"(.+)\"$/
+  @cvar_regex ~r/^"(\w+)\" = \"(\w+)"$/
+  @server_cvar_regex ~r/^server_cvar: "(\w+)" "(\w+)"$/
+  @say_regex ~r/^"(.+)<\d+><([\S]+)><\w+>" (?:say|say_team) "(.+)"$/
+  @connected_regex ~r/^"(.+)<\d+><([\S]+)><>" connected, address "([0-9.]+):([0-9]+)"$/
   def parse_message(message) do
     cond do
       Regex.match?(@cvar_regex, message) ->
@@ -23,7 +24,10 @@ defmodule Loggregate.LogReceiver.LogParser do
         %{line: message, type: :cvar, cvar: %{name: cvar, value: value}}
       Regex.match?(@say_regex, message) ->
         [_, name, steamid, chat_message] = Regex.run(@say_regex, message)
-        %{line: message, type: :chat, message: chat_message, from: %{steamid: steamid, name: name}}
+        %{line: message, type: :chat, message: chat_message, who: %{steamid: steamid, name: name}}
+      Regex.match?(@connected_regex, message) ->
+          [_, name, steamid, address, port] = Regex.run(@connected_regex, message)
+          %{line: message, type: :connected, who: %{steamid: steamid, name: name, address: address, port: port}}
       true ->
         %{line: message, type: :raw}
     end

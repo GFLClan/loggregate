@@ -2,8 +2,8 @@ use Mix.Config
 
 # Configure your database
 config :loggregate, Loggregate.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "loggregate",
+  password: "loggregate",
   database: "loggregate_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,

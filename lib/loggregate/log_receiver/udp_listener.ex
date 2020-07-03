@@ -10,7 +10,7 @@ defmodule Loggregate.LogReceiver.UdpListener do
   end
 
   def handle_info({:udp, _socket, address, port, <<0xff, 0xff, 0xff, 0xff, 0x53, data::binary>>}, socket) do
-    Task.start(Loggregate.LogReceiver.LogIngestWorker, :log_msg_passwd, [data, {address, port}])
+    GenStage.cast(Loggregate.LogReceiver.LogIngestProducer, {:new_log, {data, {address, port}}})
     {:noreply, socket}
   end
 

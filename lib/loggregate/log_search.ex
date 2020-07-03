@@ -23,12 +23,12 @@ defmodule Loggregate.LogSearch do
     dynamic(ilike(fragment("log_data -> 'cvar' ->> 'name'"), ^"%#{LikeQuery.like_sanitize(cvar)}%"))
   end
 
-  def search_chat_name(name) do
-    dynamic(ilike(fragment("log_data -> 'from' ->> 'name'"), ^"%#{LikeQuery.like_sanitize(name)}%") or fragment("to_tsvector('english', log_data -> 'from' ->> 'name') @@ plainto_tsquery('english', ?)", ^name))
+  def search_name(name) do
+    dynamic(ilike(fragment("log_data -> 'who' ->> 'name'"), ^"%#{LikeQuery.like_sanitize(name)}%") or fragment("to_tsvector('english', log_data -> 'who' ->> 'name') @@ plainto_tsquery('english', ?)", ^name))
   end
 
-  def search_chat_steamid(steamid) do
-    dynamic(ilike(fragment("log_data -> 'from' ->> 'steamid'"), ^"%#{LikeQuery.like_sanitize(steamid)}%"))
+  def search_steamid(steamid) do
+    dynamic(ilike(fragment("log_data -> 'who' ->> 'steamid'"), ^"%#{LikeQuery.like_sanitize(steamid)}%"))
   end
 
   def search_address(address) do
@@ -62,13 +62,13 @@ defmodule Loggregate.LogSearch do
     end
 
     conditions = unless opts[:name] == nil do
-      dynamic(^search_chat_name(opts[:name]) and ^conditions)
+      dynamic(^search_name(opts[:name]) and ^conditions)
     else
       conditions
     end
 
     conditions = unless opts[:steamid] == nil do
-      dynamic(^search_chat_steamid(opts[:steamid]) and ^conditions)
+      dynamic(^search_steamid(opts[:steamid]) and ^conditions)
     else
       conditions
     end

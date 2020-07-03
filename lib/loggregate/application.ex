@@ -6,6 +6,8 @@ defmodule Loggregate.Application do
   use Application
 
   def start(_type, _args) do
+    import Supervisor.Spec
+
     # List all child processes to be supervised
     children = [
       # Start the Ecto repository
@@ -14,8 +16,11 @@ defmodule Loggregate.Application do
       LoggregateWeb.Endpoint,
       # Starts a worker by calling: Loggregate.Worker.start_link(arg)
       # {Loggregate.Worker, arg},
-      {Loggregate.LogReceiver.UdpListener, 26015}
+      {Loggregate.LogReceiver.UdpListener, 26015},
+      {Loggregate.LogReceiver.LogIngestProducer, []}
     ]
+
+    children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogIngestWorker, [], id: i)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
