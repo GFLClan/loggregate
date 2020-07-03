@@ -18,7 +18,6 @@ defmodule Loggregate.LogReceiver.LogIngestProducer do
   end
 
   def dispatch_events(queue, demand, events) do
-    IO.puts("Dispatching events with #{demand} demand")
     case :queue.out(queue) do
       {{:value, entry}, queue} ->
         dispatch_events(queue, demand - 1, [entry | events])
