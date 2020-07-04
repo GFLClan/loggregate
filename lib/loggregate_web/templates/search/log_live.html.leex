@@ -1,3 +1,20 @@
-<%= for item <- @entries do %>
-    <span><%= item %></span>
-<% end %>
+<form phx-submit="update_filter">
+    <div class="field has-addons">
+        <p class="control is-expanded has-icons-left">
+            <input class="input is-medium" type="text" placeholder="Filter" name="query" value="<%= @filter %>"/>
+            <span class="icon is-left">
+                <i class="fa fa-search"></i>
+            </span>
+        </p>
+        <p class="control">
+            <button class="button is-info is-medium">Update</button>
+        </p>
+    </div>
+</form>
+<pre>
+    <code>
+        <%= for item <- @entries do %>
+            <span><%= item %></span>
+        <% end %>
+    </code>
+</pre>

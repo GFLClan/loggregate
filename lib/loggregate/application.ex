@@ -18,11 +18,13 @@ defmodule Loggregate.Application do
       # {Loggregate.Worker, arg},
       {Loggregate.LogReceiver.UdpListener, 26015},
       {Loggregate.LogReceiver.LogIngestProducer, []},
+      {Loggregate.LogReceiver.LogIngestBroadcaster, []},
+      {Loggregate.LogReceiver.LogDatabaseProducer, []},
       {Phoenix.PubSub, [name: Loggregate.PubSub, adapter: Phoenix.PubSub.PG2]}
     ]
 
-    children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogIngestWorker, [], id: i)
-
+    children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogDatabaseConsumer, [], id: "db-worker-#{i}")
+    children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogParserConsumer, [], id: "parser-#{i}")
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Loggregate.Supervisor]
