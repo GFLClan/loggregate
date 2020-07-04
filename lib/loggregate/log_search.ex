@@ -95,7 +95,7 @@ defmodule Loggregate.LogSearch do
   end
 
   def build_search_predicate(search_string) do
-    {opts, _args, _} = parse_search_string(search_string)
+    {opts, args, _} = parse_search_string(search_string)
     predicate = fn %ParsedLogEntry{} = _entry ->
       true
     end
@@ -114,6 +114,25 @@ defmodule Loggregate.LogSearch do
 
     predicate = unless opts[:type] == nil do
       predicate_type(opts[:type], predicate)
+    else
+      predicate
+    end
+
+    predicate = unless opts[:name] == nil do
+      predicate_name(opts[:name], predicate)
+    else
+      predicate
+    end
+
+    predicate = unless opts[:steamid] == nil do
+      predicate_steam_id(opts[:steamid], predicate)
+    else
+      predicate
+    end
+
+    line_search = Enum.join(args, " ")
+    predicate = unless line_search == "" do
+      predicate_line(line_search, predicate)
     else
       predicate
     end
@@ -141,6 +160,24 @@ defmodule Loggregate.LogSearch do
   def predicate_type(type, predicate) do
     fn %ParsedLogEntry{} = entry ->
       to_string(entry.log_data.type) == String.downcase(type) and predicate.(entry)
+    end
+  end
+
+  def predicate_name(name, predicate) do
+    fn %ParsedLogEntry{} = entry ->
+      Map.has_key?(entry.log_data, :who) and FuzzyCompare.similarity(entry.log_data.who.name, name) > 0.9 and predicate.(entry)
+    end
+  end
+
+  def predicate_steam_id(steam_id, predicate) do
+    fn %ParsedLogEntry{} = entry ->
+      Map.has_key?(entry.log_data, :who) and downcase_cmp(entry.log_data.who.steamid, steam_id) and predicate.(entry)
+    end
+  end
+
+  def predicate_line(line_search, predicate) do
+    fn %ParsedLogEntry{} = entry ->
+      FuzzyCompare.similarity(entry.log_data.line, line_search) > 0.9 and predicate.(entry)
     end
   end
 

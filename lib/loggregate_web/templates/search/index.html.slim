@@ -5,10 +5,15 @@ section.hero.is-fullheight.is-medium.is-primary.is-bold
         .card
           .card-content
             .level
-              a.button.is-info
-                span.icon.is-small
-                  i.fas.fa-cog
-                span Settings
+              span
+                a.button.is-info
+                  span.icon.is-small
+                    i.fas.fa-cog
+                  span Settings
+                a.button.is-info href=Routes.live_path(@conn, LoggregateWeb.DashboardLive)
+                  span.icon.is-small
+                    i.fas.fa-terminal
+                  span Live
               p.title.has-text-dark Loggregate
               a.button.is-info
                 span.icon.is-small
