@@ -6,7 +6,7 @@ defmodule Loggregate.LogReceiver.LiveViewConsumer do
   end
 
   def init(parent) do
-    {:consumer, parent, subscribe_to: [Loggregate.LogReceiver.LogIngestBroadcaster]}
+    {:consumer, parent}
   end
 
   def handle_events(events, _from, parent) do

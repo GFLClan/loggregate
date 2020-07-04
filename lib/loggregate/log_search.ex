@@ -2,6 +2,7 @@ defmodule Loggregate.LogSearch do
   import Ecto.Query
   alias Loggregate.LikeQuery
   alias Loggregate.ServerMapping
+  alias Loggregate.LogReceiver.ParsedLogEntry
 
   def search_line(search_term) do
     dynamic(fragment("(to_tsvector('english', log_data ->> 'line') @@ plainto_tsquery('english', ?))", ^search_term))
@@ -35,8 +36,12 @@ defmodule Loggregate.LogSearch do
     dynamic(ilike(fragment("(log_data ->> 'address')"), ^"%#{LikeQuery.like_sanitize(address)}%"))
   end
 
+  def parse_search_string(search_string) do
+    OptionParser.parse(OptionParser.split(search_string), strict: [type: :string, cvar: :string, server: :string, name: :string, steamid: :string, address: :string])
+  end
+
   def build_search_conditions(search_string) do
-    {opts, args, _} = OptionParser.parse(OptionParser.split(search_string), strict: [type: :string, cvar: :string, server: :string, name: :string, steamid: :string, address: :string])
+    {opts, args, _} = parse_search_string(search_string)
     conditions = true
     conditions = unless opts[:cvar] == nil do
       dynamic(^search_cvar(opts[:cvar]) and ^conditions)
@@ -87,5 +92,59 @@ defmodule Loggregate.LogSearch do
     end
 
     conditions
+  end
+
+  def build_search_predicate(search_string) do
+    {opts, _args, _} = parse_search_string(search_string)
+    predicate = fn %ParsedLogEntry{} = _entry ->
+      true
+    end
+
+    predicate = unless opts[:cvar] == nil do
+      predicate_cvar(opts[:cvar], predicate)
+    else
+      predicate
+    end
+
+    predicate = unless opts[:server] == nil do
+      predicate_server_name(opts[:server], predicate)
+    else
+      predicate
+    end
+
+    predicate = unless opts[:type] == nil do
+      predicate_type(opts[:type], predicate)
+    else
+      predicate
+    end
+
+    predicate
+  end
+
+  def predicate_cvar(cvar_name, predicate) do
+    fn %ParsedLogEntry{} = entry ->
+      entry.log_data.type == :cvar and downcase_cmp(entry.log_data.cvar.name, cvar_name) and predicate.(entry)
+    end
+  end
+
+  def predicate_server_name(server_name, predicate) do
+    fn %ParsedLogEntry{} = entry ->
+      server = ServerMapping.search_by_server_name(server_name)
+      if server != nil do
+        entry.server_id == server.server_id and predicate.(entry)
+      else
+        predicate
+      end
+    end
+  end
+
+  def predicate_type(type, predicate) do
+    fn %ParsedLogEntry{} = entry ->
+      to_string(entry.log_data.type) == String.downcase(type) and predicate.(entry)
+    end
+  end
+
+  def downcase_cmp(a, b) do
+    String.downcase(a) == String.downcase(b)
   end
 end
