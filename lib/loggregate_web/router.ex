@@ -17,11 +17,13 @@ defmodule LoggregateWeb.Router do
     plug Loggregate.Plugs.LoginRequired
   end
 
+  steamex_route_auth()
+
   scope "/", LoggregateWeb do
     pipe_through :browser
 
     get "/", PageController, :index
-    post "/login", PageController, :do_login
+    post "/logout", PageController, :do_logout
   end
 
   scope "/dashboard", LoggregateWeb do

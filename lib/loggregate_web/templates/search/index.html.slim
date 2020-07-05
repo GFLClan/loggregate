@@ -1,51 +1,50 @@
-section.hero.is-fullheight.is-medium.is-primary.is-bold
-  .container.is-fluid style="padding-top: 32px; padding-bottom: 32px;"
-    .columns.is-centered
-      .column.is-three-quarters
-        .card
-          .card-content
-            .level
-              span
-                a.button.is-info
-                  span.icon.is-small
-                    i.fas.fa-cog
-                  span Settings
-                a.button.is-info href=Routes.live_path(@conn, LoggregateWeb.DashboardLive)
-                  span.icon.is-small
-                    i.fas.fa-terminal
-                  span Live
-              p.title.has-text-dark Loggregate
-              a.button.is-info
-                span.icon.is-small
-                  i.fas.fa-sign-out-alt
-                span Logout
-            = form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f ->
-              .field.has-addons
-                p.control.is-expanded.has-icons-left
-                  input.input.is-medium type="text" placeholder="Search" name="query" value=@query
-                  span.icon.is-left
-                    i.fa.fa-search
-                p.control
-                  button.button.is-info.is-medium Search
-              .field.is-horizontal
-                .field-label.is-normal
-                  label.label Time span
-                p.control
-                  input type="date" name="date_range" data-is-range="true" data-type="datetime" data-start-date=@start_date data-end-date=@end_date
-            table.table.is-fullwidth
-              thead
-                th Timestamp
-                th Server
-                th Line
-              = for %{timestamp: timestamp, log_data: log_data, server_name: server_name} <- @results do
-                tr
-                  td width="20%"
-                    = timestamp
-                  td width="20%"
-                    = server_name
-                  td
-                    = log_data["line"]
-            = if Enum.count(@results) == 50 do
-              - last = Enum.at(@results, -1)
-              a.button.is-info href=Routes.search_path(@conn, :index, query: @query, date_range: format_date_range(@start_date, @end_date), after: last.id)
-                | Next
+.level
+  .level-item
+    p.title.has-text-dark Loggregate
+.level
+  .level-left
+    a.button.is-info.mr-2
+      span.icon.is-small
+        i.fas.fa-cog
+      span Settings
+    a.button.is-info href=Routes.live_path(@conn, LoggregateWeb.DashboardLive)
+      span.icon.is-small
+        i.fas.fa-terminal
+      span Live
+  .level-right
+    = form_for @conn, Routes.page_path(@conn, :do_logout), [method: :post], fn f ->
+      input type="hidden" name="logout" value="true"
+      button.button.is-info
+        span.icon.is-small
+          i.fas.fa-sign-out-alt
+        span Logout
+= form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f ->
+  .field.has-addons
+    p.control.is-expanded.has-icons-left
+      input.input.is-medium type="text" placeholder="Search" name="query" value=@query
+      span.icon.is-left
+        i.fa.fa-search
+    p.control
+      button.button.is-info.is-medium Search
+  .field.is-horizontal
+    .field-label.is-normal
+      label.label Time span
+    p.control
+      input type="date" name="date_range" data-is-range="true" data-type="datetime" data-start-date=@start_date data-end-date=@end_date
+table.table.is-fullwidth
+  thead
+    th Timestamp
+    th Server
+    th Line
+  = for %{timestamp: timestamp, log_data: log_data, server_name: server_name} <- @results do
+    tr
+      td width="20%"
+        = timestamp
+      td width="20%"
+        = server_name
+      td
+        = log_data["line"]
+= if Enum.count(@results) == 50 do
+  - last = Enum.at(@results, -1)
+  a.button.is-info href=Routes.search_path(@conn, :index, query: @query, date_range: format_date_range(@start_date, @end_date), after: last.id)
+    | Next

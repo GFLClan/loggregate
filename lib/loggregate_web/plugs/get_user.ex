@@ -7,9 +7,9 @@ defmodule LoggregateWeb.Plugs.GetUser do
   end
 
   def call(conn, _params) do
-    username = get_session(conn, :username)
-    if username != nil do
-      case Accounts.get_by_username(username) do
+    steamid = get_session(conn, :steamex_steamid64)
+    if steamid != nil do
+      case Accounts.get_by_steamid(steamid) do
         %Loggregate.Accounts.User{} = user ->
           assign(conn, :user, user)
         _ ->

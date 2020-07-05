@@ -47,7 +47,8 @@ defmodule Loggregate.MixProject do
       {:argon2_elixir, "~> 2.0"},
       {:gen_stage, "~> 1.0"},
       {:phoenix_live_view, "~> 0.13.3"},
-      {:fuzzy_compare, "~> 1.0"}
+      {:fuzzy_compare, "~> 1.0"},
+      {:steamex, "~> 0.0.9"}
     ]
   end
 

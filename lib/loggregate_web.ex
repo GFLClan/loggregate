@@ -42,6 +42,7 @@ defmodule LoggregateWeb do
       import LoggregateWeb.ErrorHelpers
       import LoggregateWeb.Gettext
       alias LoggregateWeb.Router.Helpers, as: Routes
+      use Steamex.Auth.Phoenix, :view
     end
   end
 
@@ -50,6 +51,7 @@ defmodule LoggregateWeb do
       use Phoenix.Router
       import Plug.Conn
       import Phoenix.Controller
+      use Steamex.Auth.Phoenix, :router
     end
   end
 

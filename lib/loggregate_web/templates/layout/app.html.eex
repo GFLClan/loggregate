@@ -1,1 +1,13 @@
-<%= @inner_content %>
+<section class="secion hero is-fullheight is-medium is-primary is-bold">
+    <div class="container is-fluid" style="padding-top: 32px; padding-bottom: 32px;">
+        <div class="columns is-centered">
+            <div class="column is-three-quarters">
+                <div class="card">
+                    <div class="card-content">
+                        <%= @inner_content %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

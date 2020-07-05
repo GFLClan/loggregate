@@ -5,17 +5,10 @@ section.hero.is-fullheight.is-medium.is-primary.is-bold
         .column.is-one-quarter
           .card
             .card-content
-              p.title.has-text-dark.has-text-centered Loggregate
-              = form_for @conn, Routes.page_path(@conn, :do_login), fn f ->
-                .field
-                  p.control.has-icons-left
-                    = text_input f, :username, class: "input", placeholder: "Username"
-                    span.icon.is-small.is-left
-                      i.fa.fa-user
-                .field
-                  p.control.has-icons-left
-                    = password_input f, :password, class: "input", placeholder: "Password"
-                    span.icon.is-small.is-left
-                      i.fa.fa-lock
-                p.control
-                  button.button.is-primary.is-medium.is-fullwidth Login
+              .level
+                .level-item
+                  p.title.has-text-dark Loggregate
+              .level
+                .level-item
+                  a href=steamex_auth_url(@conn)
+                    img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_02.png"

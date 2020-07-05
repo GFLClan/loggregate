@@ -37,8 +37,8 @@ defmodule Loggregate.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
-  def get_by_username(name) do
-    Repo.one(from u in User, where: u.username == ^name)
+  def get_by_steamid(steamid) do
+    Repo.one(from u in User, where: u.steamid == ^to_string(steamid))
   end
 
   @doc """
