@@ -40,7 +40,8 @@ config :loggregate, LoggregateWeb.Endpoint,
 # If you are doing OTP releases, you need to instruct Phoenix
 # to start each relevant endpoint:
 #
-#     config :loggregate, LoggregateWeb.Endpoint, server: true
+config :loggregate, LoggregateWeb.Endpoint, server: true
+
 #
 # Then you can assemble a release by calling `mix release`.
 # See `mix help release` for more information.
