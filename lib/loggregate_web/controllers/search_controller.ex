@@ -40,8 +40,8 @@ defmodule LoggregateWeb.SearchController do
       join: s in ServerMapping, on: s.server_id == fragment("(log_data -> 'server')::integer"),
       join: a in subquery(after_query),
       where: ^dynamic([e, s, a], e.timestamp >= ^start_date and e.timestamp <= ^end_date and e.id < a.after_id and e.timestamp <= a.after_timestamp and ^conditions)
-    Repo.all(from [e, s, a] in query, 
-      select: %{timestamp: e.timestamp, log_data: e.log_data, id: e.id, server_name: s.server_name}, 
+    Repo.all(from [e, s, a] in query,
+      select: %{timestamp: e.timestamp, log_data: e.log_data, id: e.id, server_name: s.server_name},
       order_by: [desc: e.timestamp, desc: e.id], limit: 50
     )
   end
@@ -50,8 +50,8 @@ defmodule LoggregateWeb.SearchController do
     query = from e in LogEntry,
       join: s in ServerMapping, on: s.server_id == fragment("(log_data -> 'server')::integer"),
       where: ^dynamic([e], e.timestamp >= ^start_date and e.timestamp <= ^end_date and ^conditions)
-    Repo.all(from [e, s] in query, 
-      select: %{timestamp: e.timestamp, log_data: e.log_data, id: e.id, server_name: s.server_name}, 
+    Repo.all(from [e, s] in query,
+      select: %{timestamp: e.timestamp, log_data: e.log_data, id: e.id, server_name: s.server_name},
       order_by: [desc: e.timestamp, desc: e.id], limit: 50
     )
   end

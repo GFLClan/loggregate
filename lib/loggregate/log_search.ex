@@ -86,7 +86,7 @@ defmodule Loggregate.LogSearch do
 
     line_search = Enum.join(args, " ")
     conditions = unless line_search == "" do
-      dynamic(^search_line(line_search) or ^search_message(line_search) and ^conditions)
+      dynamic(^dynamic(^search_line(line_search) or ^search_message(line_search)) and ^conditions)
     else
       conditions
     end

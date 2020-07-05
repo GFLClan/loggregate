@@ -1,19 +1,20 @@
-section.hero.is-fullheight.is-medium.is-primary.is-bold
-  .container.is-fluid style="padding-top: 32px; padding-bottom: 32px;"
-    .columns.is-centered
-      .column.is-three-quarters
-        .card
-          .card-content
-            fieldset disabled=true
-              .field.is-horizontal
-                .field-label.is-normal
-                  label.label Timestamp
-                .field-body
-                  .field
-                    p.control
-                      input.input.is-disabled type="text" value=@entry.timestamp
-              .field.is-horizontal
-                .field-label.is-normal
-                  label.label Line
-                .field-body
-                  code.is-expanded = @entry.log_data["line"]
+fieldset disabled=true
+  .field.is-horizontal
+    .field-label.is-normal
+      label.label Server
+    .field-body
+      .field
+        p.control
+          input.input.is-disabled type="text" value=@entry.log_data["address"]
+  .field.is-horizontal
+    .field-label.is-normal
+      label.label Timestamp
+    .field-body
+      .field
+        p.control
+          input.input.is-disabled type="text" value=@entry.timestamp
+  .field.is-horizontal
+    .field-label.is-normal
+      label.label Line
+    .field-body
+      code.is-expanded = @entry.log_data["line"]

@@ -4,6 +4,40 @@
             <div class="column is-three-quarters">
                 <div class="card">
                     <div class="card-content">
+                        <div class="level">
+                            <div class="level-item">
+                                <a href="<%= Routes.search_path(@conn, :index) %>">
+                                    <p class="title has-text-dark">Loggregate</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="level">
+                            <div class="level-left">
+                                <a class="button is-info mr-2" href="<%= Routes.search_path(@conn, :index) %>">
+                                    <span class="icon is-small">
+                                        <i class="fas fa-cog"></i>
+                                    </span>
+                                    <span>Settings</span>
+                                </a>
+                                <a class="button is-info mr-2" href="<%= Routes.live_path(@conn, LoggregateWeb.DashboardLive) %>">
+                                    <span class="icon is-small">
+                                        <i class="fas fa-terminal"></i>
+                                    </span>
+                                    <span>Live</span>
+                                </a>
+                            </div>
+                            <div class="level-right">
+                                <%= form_for @conn, Routes.page_path(@conn, :do_logout), [method: :post], fn f -> %>
+                                    <input type="hidden" name="logout" value="true"/>
+                                    <button class="button is-info">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </span>
+                                        <span>Logout</span>
+                                    </button>
+                                <% end %>
+                            </div>
+                        </div>
                         <%= @inner_content %>
                     </div>
                 </div>
