@@ -21,15 +21,18 @@ defmodule LoggregateWeb.DashboardLive do
       assign(socket, filter: "", predicate: fn _entry -> true end)
     end
 
-    {:ok, assign(socket, entries: [])}
+    {:ok, assign(socket, entries: []), temporary_assigns: [entries: []]}
   end
 
-  def handle_info({:log_msg, log_msg}, %{assigns: %{predicate: predicate} = _assigns} = socket) do
-    if predicate.(log_msg) do
-      {:noreply, update(socket, :entries, &([log_msg.log_data.line | &1] |> Enum.slice(0, 50)))}
-    else
-      {:noreply, socket}
-    end
+  def handle_info({:new_msgs, log_msgs}, %{assigns: %{predicate: predicate} = _assigns} = socket) do
+    matching_entries = Enum.filter(log_msgs, &(predicate.(&1))) |>
+      Enum.map(fn entry ->
+        hash = :crypto.hash(:md5, entry.log_data.line <> (entry.timestamp |> NaiveDateTime.to_string))
+
+        %{hash: Base.encode16(hash), entry: entry}
+      end)
+
+    {:noreply, assign(socket, :entries, matching_entries)}
   end
 
   def handle_event("update_filter", %{"query" => query}, socket) do

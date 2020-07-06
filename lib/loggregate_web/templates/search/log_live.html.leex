@@ -11,10 +11,10 @@
         </p>
     </div>
 </form>
-<pre>
-    <code>
+<div class="code">
+    <code id="log_entries" phx-update="prepend" phx-hook="LiveConsole">
         <%= for item <- @entries do %>
-            <span><%= item %></span>
+            <p id="<%= item.hash %>"><%= item.entry.log_data.line %></p>
         <% end %>
     </code>
-</pre>
+</div>

@@ -16,13 +16,21 @@ import { Socket } from "phoenix"
 import LiveSocket from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+
 let Hooks = {};
 Hooks.Filter = {
     updated() {
-        console.log(this.el);
         window.location.hash = this.el.value;
     }
-}
+};
+Hooks.LiveConsole = {
+    updated() {
+        if (this.el.children.length > 100) {
+            Array.prototype.slice.call(this.el.children, 100 - this.el.children.length).map((child) => this.el.removeChild(child));
+        }
+    }
+};
+
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken, hash: window.location.hash}, hooks: Hooks});
 liveSocket.connect();
 

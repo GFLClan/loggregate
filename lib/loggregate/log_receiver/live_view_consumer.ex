@@ -10,7 +10,7 @@ defmodule Loggregate.LogReceiver.LiveViewConsumer do
   end
 
   def handle_events(events, _from, parent) do
-    Enum.map(events, &(send(parent, {:log_msg, &1})))
+    send(parent, {:new_msgs, events})
     {:noreply, [], parent}
   end
 end
