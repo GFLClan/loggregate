@@ -4,38 +4,38 @@ defmodule LoggregateWeb.DashboardLive do
 
   def mount(_params, _assigns, socket) do
     socket = if connected?(socket) do
+      {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
+      {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, cancel: :transient)
       case get_connect_params(socket) do
         %{"hash" => <<"#", hash::binary>>} ->
-          {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
           query = URI.decode(to_string(hash))
           predicate = LogSearch.build_search_predicate(query)
-          {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, selector: predicate, cancel: :transient)
 
-          assign(socket, consumer: consumer, subscription_tag: tag, filter: query)
+          assign(socket, consumer: consumer, subscription_tag: tag, filter: query, predicate: predicate)
         params ->
           IO.inspect(params)
-          {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
-          {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, cancel: :transient)
 
-          assign(socket, consumer: consumer, subscription_tag: tag, filter: "")
+          assign(socket, consumer: consumer, subscription_tag: tag, filter: "", predicate: fn _entry -> true end)
       end
     else
-      assign(socket, filter: "")
+      assign(socket, filter: "", predicate: fn _entry -> true end)
     end
 
     {:ok, assign(socket, entries: [])}
   end
 
-  def handle_info({:log_msg, log_msg}, socket) do
-    {:noreply, update(socket, :entries, &([log_msg.log_data.line | &1] |> Enum.slice(0, 50)))}
+  def handle_info({:log_msg, log_msg}, %{assigns: %{predicate: predicate} = _assigns} = socket) do
+    if predicate.(log_msg) do
+      {:noreply, update(socket, :entries, &([log_msg.log_data.line | &1] |> Enum.slice(0, 50)))}
+    else
+      {:noreply, socket}
+    end
   end
 
-  def handle_event("update_filter", %{"query" => query}, %{assigns: %{consumer: consumer, subscription_tag: tag} = _assigns} = socket) do
+  def handle_event("update_filter", %{"query" => query}, socket) do
     predicate = LogSearch.build_search_predicate(query)
-    {:ok, tag} = GenStage.sync_resubscribe(consumer, tag, :normal, to: Loggregate.LogReceiver.LogIngestBroadcaster, selector: predicate, cancel: :transient)
-    socket = assign(socket, entries: [], filter: query, subscription_tag: tag)
 
-    {:noreply, socket}
+    {:noreply, assign(socket, entries: [], filter: query, predicate: predicate)}
   end
 
   def render(assigns) do
