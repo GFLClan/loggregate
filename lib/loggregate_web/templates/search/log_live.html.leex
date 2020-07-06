@@ -1,7 +1,7 @@
 <form phx-submit="update_filter">
     <div class="field has-addons">
         <p class="control is-expanded has-icons-left">
-            <input class="input is-medium" type="text" placeholder="Filter" name="query" value="<%= @filter %>"/>
+            <input class="input is-medium" type="text" placeholder="Filter" name="query" value="<%= @filter %>" phx-hook="Filter"/>
             <span class="icon is-left">
                 <i class="fa fa-search"></i>
             </span>

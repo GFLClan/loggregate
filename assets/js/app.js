@@ -16,7 +16,14 @@ import { Socket } from "phoenix"
 import LiveSocket from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}});
+let Hooks = {};
+Hooks.Filter = {
+    updated() {
+        console.log(this.el);
+        window.location.hash = this.el.value;
+    }
+}
+let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken, hash: window.location.hash}, hooks: Hooks});
 liveSocket.connect();
 
 // Import local files

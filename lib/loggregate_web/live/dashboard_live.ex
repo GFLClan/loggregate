@@ -4,15 +4,26 @@ defmodule LoggregateWeb.DashboardLive do
 
   def mount(_params, _assigns, socket) do
     socket = if connected?(socket) do
-      {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
-      {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, cancel: :transient)
+      case get_connect_params(socket) do
+        %{"hash" => <<"#", hash::binary>>} ->
+          {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
+          query = to_string(hash)
+          predicate = LogSearch.build_search_predicate(query)
+          {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, selector: predicate, cancel: :transient)
 
-      assign(socket, consumer: consumer, subscription_tag: tag)
+          assign(socket, consumer: consumer, subscription_tag: tag, filter: query)
+        params ->
+          IO.inspect(params)
+          {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
+          {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, cancel: :transient)
+
+          assign(socket, consumer: consumer, subscription_tag: tag, filter: "")
+      end
     else
-      socket
+      assign(socket, filter: "")
     end
 
-    {:ok, assign(socket, entries: [], filter: "")}
+    {:ok, assign(socket, entries: [])}
   end
 
   def handle_info({:log_msg, log_msg}, socket) do
