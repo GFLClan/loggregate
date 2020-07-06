@@ -45,6 +45,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   alias Loggregate.LogReceiver.Parsers
   @parsers [
     Parsers.Cvar,
+    Parsers.Rcon,
     Parsers.Connected,
     Parsers.Say,
     Parsers.Raw
