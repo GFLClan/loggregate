@@ -42,33 +42,27 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     {timestamp, parse_message(message)}
   end
 
-  @cvar_regex ~r/^"(\w+)\" = \"(\w+)"$/
-  @server_cvar_regex ~r/^server_cvar: "(\w+)" "(\w+)"$/
-  @say_regex ~r/^"(.+)<\d+><([\S]+)><\w+>" (?:say|say_team) "(.+)"$/
-  @connected_regex ~r/^"(.+)<\d+><([\S]+)><>" connected, address "([0-9.]+):([0-9]+)"$/
-  @who_regex ~r/"(.+)<\d+><([\S]+)><\w*>"/
-  def parse_message(message) do
-    cond do
-      Regex.match?(@cvar_regex, message) ->
-        [_, cvar, value] = Regex.run(@cvar_regex, message)
-        %{line: message, type: :cvar, cvar: %{name: cvar, value: value}}
-      Regex.match?(@server_cvar_regex, message) ->
-        [_, cvar, value] = Regex.run(@server_cvar_regex, message)
-        %{line: message, type: :cvar, cvar: %{name: cvar, value: value}}
-      Regex.match?(@say_regex, message) ->
-        [_, name, steamid, chat_message] = Regex.run(@say_regex, message)
-        %{line: message, type: :chat, message: chat_message, who: %{steamid: steamid, name: name}}
-      Regex.match?(@connected_regex, message) ->
-          [_, name, steamid, address, port] = Regex.run(@connected_regex, message)
-          %{line: message, type: :connected, who: %{steamid: steamid, name: name, address: address, port: port}}
-      true ->
-        if Regex.match?(@who_regex, message) do
-          [_, name, steamid] = Regex.run(@who_regex, message)
+  alias Loggregate.LogReceiver.Parsers
+  @parsers [
+    Parsers.Cvar,
+    Parsers.Connected,
+    Parsers.Say,
+    Parsers.Raw
+  ]
 
-          %{line: message, type: :raw, who: %{steamid: steamid, name: name}}
-        else
-          %{line: message, type: :raw}
+
+
+  def parse_message(message) do
+    Enum.reduce(@parsers, :no_match, fn parser, acc ->
+        case acc do
+          :no_match ->
+            case parser.parse(message) do
+              :skip -> :skip
+              :no_match -> :no_match
+              {:ok, parsed} -> parsed
+            end
+          _ -> acc
         end
-    end
+    end)
   end
 end
