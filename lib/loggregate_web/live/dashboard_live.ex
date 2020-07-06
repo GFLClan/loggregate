@@ -7,7 +7,7 @@ defmodule LoggregateWeb.DashboardLive do
       case get_connect_params(socket) do
         %{"hash" => <<"#", hash::binary>>} ->
           {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
-          query = to_string(hash)
+          query = URI.decode(to_string(hash))
           predicate = LogSearch.build_search_predicate(query)
           {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, selector: predicate, cancel: :transient)
 
