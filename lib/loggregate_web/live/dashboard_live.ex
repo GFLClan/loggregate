@@ -21,10 +21,10 @@ defmodule LoggregateWeb.DashboardLive do
       assign(socket, filter: "", predicate: fn _entry -> true end)
     end
 
-    {:ok, assign(socket, entries: []), temporary_assigns: [entries: []]}
+    {:ok, assign(socket, entries: [], paused: false), temporary_assigns: [entries: []]}
   end
 
-  def handle_info({:new_msgs, log_msgs}, %{assigns: %{predicate: predicate} = _assigns} = socket) do
+  def handle_info({:new_msgs, log_msgs}, %{assigns: %{predicate: predicate, paused: false} = _assigns} = socket) do
     matching_entries = Enum.filter(log_msgs, &(predicate.(&1))) |>
       Enum.map(fn entry ->
         hash = :crypto.hash(:md5, entry.log_data.line <> (entry.timestamp |> NaiveDateTime.to_string))
@@ -35,10 +35,22 @@ defmodule LoggregateWeb.DashboardLive do
     {:noreply, assign(socket, :entries, matching_entries)}
   end
 
+  def handle_info({:new_msgs, _log_msgs}, %{assigns: %{paused: true} = _assigns} = socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("update_filter", %{"query" => query}, socket) do
     predicate = LogSearch.build_search_predicate(query)
 
-    {:noreply, assign(socket, entries: [], filter: query, predicate: predicate)}
+    {:noreply, assign(socket, filter: query, predicate: predicate)}
+  end
+
+  def handle_event("pause", _value, socket) do
+    {:noreply, assign(socket, paused: true)}
+  end
+
+  def handle_event("unpause", _value, socket) do
+    {:noreply, assign(socket, paused: false)}
   end
 
   def render(assigns) do

@@ -7,7 +7,21 @@
             </span>
         </p>
         <p class="control">
-            <button class="button is-info is-medium">Update</button>
+            <%= if @paused do %>
+                <a class="button is-info is-medium" phx-click="unpause">
+                    <span class="icon is-small">
+                        <i class="fas fa-play"></i>
+                    </span>
+                    <span>Resume</span>
+                </a>
+            <% else %>
+                <a class="button is-info is-medium" phx-click="pause">
+                    <span class="icon is-small">
+                        <i class="fas fa-pause"></i>
+                    </span>
+                    <span>Pause</span>
+                </a>
+            <% end %>
         </p>
     </div>
 </form>
