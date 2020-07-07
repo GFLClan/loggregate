@@ -33,13 +33,20 @@ defmodule LoggregateWeb.Router do
     get "/log/:log_id", SearchController, :log_detail
     live "/live", DashboardLive
 
-    get "/settings/users", SettingsController, :users
-    get "/settings/users/new", SettingsController, :new_user
-    get "/settings/users/:id", SettingsController, :user
-    put "/settings/users/:id", SettingsController, :save_user
-    get "/settings/servers", SettingsController, :servers
-    get "/settings/servers/new", SettingsController, :new_server
-    get "/settings/servers/:id", SettingsController, :server
+    scope "/settings" do
+      pipe_through LoggregateWeb.Plugs.AdminOnly
+
+      get "/users", SettingsController, :users
+      get "/users/new", SettingsController, :new_user
+      put "/users/new", SettingsController, :create_user
+      get "/users/:id", SettingsController, :user
+      put "/users/:id", SettingsController, :save_user
+      delete "/users/:id", SettingsController, :delete_user
+
+      get "/servers", SettingsController, :servers
+      get "/servers/new", SettingsController, :new_server
+      get "/servers/:id", SettingsController, :server
+    end
   end
 
   # Other scopes may use custom stacks.

@@ -10,21 +10,21 @@
     <tbody>
         <%= for user <- @users do %>
             <tr>
-                <td><%= @user.name %></td>
-                <td><%= @user.steamid %></td>
+                <td><%= user.name %></td>
+                <td><%= user.steamid %></td>
                 <td>
-                    <%= if @user.admin do %>
+                    <%= if user.admin do %>
                         <span class="icon">
                             <i class="fas fa-check"></i>
                         </span>
                     <% else %>
                         <span class="icon">
-                            <i class="fas fa-cross"></i>
+                            <i class="fas fa-times"></i>
                         </span>
                     <% end %>
                 </td>
                 <td>
-                    <a class="icon" href="<%= Routes.settings_path(@conn, :user, @user.id) %>">
+                    <a class="icon" href="<%= Routes.settings_path(@conn, :user, user.id) %>">
                         <i class="fas fa-cog"></i>
                     </a>
                 </td>
@@ -32,3 +32,13 @@
         <% end %>
     </tbody>
 </table>
+<div class="field is-grouped is-grouped-right">
+  <div class="control">
+    <a href="<%= Routes.settings_path(@conn, :new_user) %>" class="button is-info">
+        <span class="icon is-small">
+            <i class="fas fa-plus"></i>
+        </span>
+        <span>New User</span>
+    </a>
+  </div>
+</div>

@@ -8,6 +8,20 @@ defmodule LoggregateWeb.SettingsController do
     render(conn, "users.html", users: users, settings: :users)
   end
 
+  def new_user(conn, _params) do
+    changeset = %Accounts.User{} |> Accounts.User.changeset(%{})
+    render(conn, "new_user.html", changeset: changeset, settings: :users)
+  end
+
+  def create_user(conn, %{"user" => new_user}) do
+    case Accounts.create_user(new_user) do
+      {:ok, user} ->
+        redirect(conn, to: Routes.settings_path(conn, :user, user))
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, "new_user.html", changeset: changeset, settings: :users)
+    end
+  end
+
   def user(conn, %{"id" => id}) do
     with user when not is_nil(user) <- Accounts.get_user(id) do
       render(conn, "user.html", changeset: Accounts.User.changeset(user, %{}), settings: :users)
@@ -19,12 +33,24 @@ defmodule LoggregateWeb.SettingsController do
   def save_user(conn, %{"id" => id, "user" => target_user}) do
     with user when not is_nil(user) <- Accounts.get_user(id) do
       case Accounts.update_user(user, target_user) do
-        {:ok, user} ->
-          render(conn, "user.html", changeset: Accounts.User.changeset(user, %{}), settings: :users)
+        {:ok, _user} ->
+          redirect(conn, to: Routes.settings_path(conn, :users))
         {:error, %Ecto.Changeset{} = changeset} ->
           render(conn, "user.html", changeset: changeset, settings: :users)
       end
+    else
+      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
+    end
+  end
 
+  def delete_user(conn, %{"id" => id}) do
+    with user when not is_nil(user) <- Accounts.get_user(id) do
+      case Accounts.delete_user(user) do
+        {:ok, _user} ->
+          redirect(conn, to: Routes.settings_path(conn, :users))
+        {:error, _err} ->
+          put_status(conn, 500) |> put_view(LoggregateWeb.ErrorView) |> render(:"500")
+      end
     else
       nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
     end
