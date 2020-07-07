@@ -1,0 +1,22 @@
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <%= for server <- @servers do %>
+            <tr>
+                <td><%= server.server_id %></td>
+                <td><%= server.server_name %></td>
+                <td>
+                    <a class="icon" href="<%= Routes.settings_path(@conn, :server, server.id) %>">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>

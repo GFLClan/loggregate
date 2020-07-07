@@ -1,0 +1,34 @@
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>SteamID</th>
+            <th>Admin?</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <%= for user <- @users do %>
+            <tr>
+                <td><%= @user.name %></td>
+                <td><%= @user.steamid %></td>
+                <td>
+                    <%= if @user.admin do %>
+                        <span class="icon">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    <% else %>
+                        <span class="icon">
+                            <i class="fas fa-cross"></i>
+                        </span>
+                    <% end %>
+                </td>
+                <td>
+                    <a class="icon" href="<%= Routes.settings_path(@conn, :user, @user.id) %>">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>

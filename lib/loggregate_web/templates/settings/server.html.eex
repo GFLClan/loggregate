@@ -1,0 +1,31 @@
+<div class="field">
+  <label class="label">Name</label>
+  <div class="control">
+    <input class="input" type="text" value="<%= @server.server_name %>">
+  </div>
+</div>
+<div class="field has-addon">
+  <label class="label">Server ID</label>
+  <div class="control has-icons-left">
+    <input class="input" type="text" value="<%= @server.server_id %>">
+    <span class="icon is-small is-left">
+      <i class="fas fa-user"></i>
+    </span>
+  </div>
+</div>
+<div class="field is-grouped">
+  <div class="control">
+    <button class="button is-info">Submit</button>
+  </div>
+  <div class="control">
+    <a class="button is-primary">
+      Refresh ID
+    </a>
+  </div>
+  <div class="control">
+    <a href="<%= Routes.settings_path(@conn, :servers) %>" class="button is-secondary">Cancel</a>
+  </div>
+  <div class="control is-pulled-right">
+    <button class="button is-danger">Delete</button>
+  </div>
+</div>

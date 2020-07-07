@@ -32,6 +32,14 @@ defmodule LoggregateWeb.Router do
     get "/", SearchController, :index
     get "/log/:log_id", SearchController, :log_detail
     live "/live", DashboardLive
+
+    get "/settings/users", SettingsController, :users
+    get "/settings/users/new", SettingsController, :new_user
+    get "/settings/users/:id", SettingsController, :user
+    put "/settings/users/:id", SettingsController, :save_user
+    get "/settings/servers", SettingsController, :servers
+    get "/settings/servers/new", SettingsController, :new_server
+    get "/settings/servers/:id", SettingsController, :server
   end
 
   # Other scopes may use custom stacks.

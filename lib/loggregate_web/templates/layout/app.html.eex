@@ -13,12 +13,21 @@
                         </div>
                         <div class="level">
                             <div class="level-left">
-                                <a class="button is-info mr-2" href="<%= Routes.search_path(@conn, :index) %>">
-                                    <span class="icon is-small">
-                                        <i class="fas fa-cog"></i>
-                                    </span>
-                                    <span>Settings</span>
-                                </a>
+                                <%= if assigns[:settings] do %>
+                                    <a class="button is-info mr-2" href="<%= Routes.search_path(@conn, :index) %>">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-table"></i>
+                                        </span>
+                                        <span>Dashboard</span>
+                                    </a>
+                                <% else %>
+                                    <a class="button is-info mr-2" href="<%= Routes.settings_path(@conn, :users) %>">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-cog"></i>
+                                        </span>
+                                        <span>Settings</span>
+                                    </a>
+                                <% end %>
                                 <a class="button is-info mr-2" href="<%= Routes.live_path(@conn, LoggregateWeb.DashboardLive) %>">
                                     <span class="icon is-small">
                                         <i class="fas fa-terminal"></i>
@@ -38,7 +47,39 @@
                                 <% end %>
                             </div>
                         </div>
-                        <%= @inner_content %>
+                        <%= if assigns[:settings] do %>
+                            <div class="columns">
+                                <div class="column is-one-third">
+                                    <article class="panel is-info">
+                                        <p class="panel-heading">
+                                            <i class="fas fa-cog"></i>
+                                            Settings
+                                        </p>
+                                        <a class="panel-block <%= if assigns[:settings] == :users do "is-active" end %>" href="<%= Routes.settings_path(@conn, :users) %>">
+                                            <span class="panel-icon">
+                                                <i class="fas fa-user"></i>
+                                            </span>
+                                            Users
+                                        </a>
+                                        <a class="panel-block <%= if assigns[:settings] == :servers do "is-active" end %>" href="<%= Routes.settings_path(@conn, :servers) %>">
+                                            <span class="panel-icon">
+                                                <i class="fas fa-server"></i>
+                                            </span>
+                                            Servers
+                                        </a>
+                                    </article>
+                                </div>
+                                <div class="column is-two-thirds">
+                                    <div class="card is-shadowless">
+                                        <div class="card-content">
+                                            <%= @inner_content %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% else %>
+                            <%= @inner_content %>
+                        <% end %>
                     </div>
                 </div>
             </div>

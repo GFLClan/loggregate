@@ -3,6 +3,14 @@ defmodule Loggregate.ServerMapping do
   alias Loggregate.Repo
   alias Loggregate.ServerMapping.ServerMapping
 
+  def list_servers() do
+    Repo.all(ServerMapping)
+  end
+
+  def get_server(id) do
+    Repo.get(ServerMapping, id)
+  end
+
   def search_by_server_id(id) do
     Repo.one(from s in ServerMapping, where: s.server_id == ^id)
   end
