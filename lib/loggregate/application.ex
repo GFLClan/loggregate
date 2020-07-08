@@ -6,6 +6,10 @@ defmodule Loggregate.Application do
   use Application
 
   def start(_type, _args) do
+    # TODO: Move this to a manager process
+    Loggregate.ElasticSearch.create_index!()
+    Loggregate.ElasticSearch.update_mapping!()
+
     import Supervisor.Spec
 
     # List all child processes to be supervised

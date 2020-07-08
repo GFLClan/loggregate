@@ -18,6 +18,9 @@ config :loggregate, LoggregateWeb.Endpoint,
   render_errors: [view: LoggregateWeb.ErrorView, accepts: ~w(html json)],
   pubsub_server: Loggregate.PubSub
 
+config :loggregate, Loggregate.ElasticSearch,
+  elasticsearch_url: "http://localhost:9200"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

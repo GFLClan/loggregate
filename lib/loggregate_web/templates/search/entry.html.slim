@@ -5,16 +5,16 @@ fieldset disabled=true
     .field-body
       .field
         p.control
-          input.input.is-disabled type="text" value=@entry.log_data["address"]
+          input.input.is-disabled type="text" value=@entry["_source"]["address"]
   .field.is-horizontal
     .field-label.is-normal
       label.label Timestamp
     .field-body
       .field
         p.control
-          input.input.is-disabled type="text" value=@entry.timestamp
+          input.input.is-disabled type="text" value=@entry["_source"]["timestamp"]
   .field.is-horizontal
     .field-label.is-normal
       label.label Line
     .field-body
-      code.is-expanded = @entry.log_data["line"]
+      code.is-expanded = @entry["_source"]["line"]

@@ -16,16 +16,15 @@ table.table.is-fullwidth
     th Timestamp
     th Server
     th Line
-  = for %{id: id, timestamp: timestamp, log_data: log_data, server_name: server_name} <- @results do
+  = for %{"_id" => id, "_source" => source} <- @results do
     tr
       td width="20%"
         a href=Routes.search_path(@conn, :log_detail, id)
-          = timestamp
+          = source["timestamp"]
       td width="20%"
-        = server_name
+        = source["server"]
       td
-        = log_data["line"]
-= if Enum.count(@results) == 50 do
-  - last = Enum.at(@results, -1)
-  a.button.is-info href=Routes.search_path(@conn, :index, query: @query, date_range: format_date_range(@start_date, @end_date), after: last.id)
+        = source["line"]
+= if Enum.count(@results) == 50 and assigns[:next_page] do
+  a.button.is-info href=Routes.search_path(@conn, :index, query: @query, date_range: format_date_range(@start_date, @end_date), from: @next_page)
     | Next
