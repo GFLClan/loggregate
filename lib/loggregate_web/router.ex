@@ -10,6 +10,7 @@ defmodule LoggregateWeb.Router do
     plug :put_secure_browser_headers
     plug :put_root_layout, {LoggregateWeb.LayoutView, :root}
     plug LoggregateWeb.Plugs.GetUser
+    plug LoggregateWeb.Plugs.GetIndexSize
   end
 
   pipeline :authenticate do
@@ -45,7 +46,11 @@ defmodule LoggregateWeb.Router do
 
       get "/servers", SettingsController, :servers
       get "/servers/new", SettingsController, :new_server
+      put "/servers/new", SettingsController, :create_server
       get "/servers/:id", SettingsController, :server
+      put "/servers/:id", SettingsController, :save_server
+      post "/servers/:id/refresh_token", SettingsController, :refresh_server_token
+      delete "/servers/:id", SettingsController, :delete_server
     end
   end
 

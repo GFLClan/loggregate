@@ -16,13 +16,19 @@ defmodule Loggregate.ElasticSearch do
         analyzer: "english",
         search_analyzer: "english"
       },
+      command: %{
+        type: "text",
+        analyzer: "simple"
+      },
       who: %{
         properties: %{
           steamid: %{type: "keyword"},
           name: %{
             type: "text",
             analyzer: "simple"
-          }
+          },
+          address: %{type: "ip"},
+          port: %{type: "long"}
         }
       },
       cvar: %{
@@ -36,19 +42,57 @@ defmodule Loggregate.ElasticSearch do
             analyzer: "simple"
           }
         }
+      },
+      from_addr: %{
+        properties: %{
+          address: %{type: "ip"},
+          port: %{type: "long"}
+        }
+      }
+    }
+  }
+
+  @policy %{
+    policy: %{
+      phases: %{
+        hot: %{
+          actions: %{
+            rollover: %{
+              max_size: "15GB",
+              max_age: "30d"
+            }
+          }
+        },
+        delete: %{
+          min_age: "90d",
+          actions: %{
+            delete: %{}
+          }
+        }
       }
     }
   }
 
   @settings %{
     settings: %{
-      analysis: %{
-        analyzer: %{
-          default: %{
-            type: "simple"
-          }
-        }
+      "index.lifecycle.rollover_alias": "loggregate",
+      "index.lifecycle.name": "loggregate_policy"
+    },
+    aliases: %{
+      loggregate: %{
+        is_write_index: true
       }
+    }
+  }
+
+  @template %{
+    index_patterns: ["loggregate-*"],
+    template: %{
+      settings: %{
+        "index.lifecycle.rollover_alias": "loggregate",
+        "index.lifecycle.name": "loggregate_policy"
+      },
+      mappings: @mapping
     }
   }
 
@@ -57,15 +101,21 @@ defmodule Loggregate.ElasticSearch do
     url
   end
 
-  def update_mapping!() do
-    {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/loggregate/_mapping", Poison.encode!(@mapping))
+  def update_settings!() do
+    case Elastix.HTTP.get("#{get_url()}/_ilm/policy/loggregate_policy") do
+      {:ok, %HTTPoison.Response{status_code: 200} = _resp} -> nil
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_ilm/policy/loggregate_policy", Poison.encode!(@policy))
+    end
+
+    {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_index_template/loggregate_template", Poison.encode!(@template))
   end
 
   def create_index!() do
     case Elastix.Index.get(get_url(), "loggregate") do
       {:ok, %HTTPoison.Response{status_code: 200} = _resp} -> nil
       {:ok, %HTTPoison.Response{status_code: 404} = _resp} ->
-        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/loggregate", Poison.encode!(@settings))
+        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/loggregate-000001", Poison.encode!(@settings))
     end
   end
 
@@ -102,8 +152,17 @@ defmodule Loggregate.ElasticSearch do
     case Elastix.HTTP.get("#{get_url()}/loggregate/_doc/#{id}") do
       {:ok, %HTTPoison.Response{status_code: 200} = res} ->
         res.body
-      res ->
-        IO.inspect(res)
+      _res ->
+        nil
+    end
+  end
+
+  def get_index_count() do
+    case Elastix.HTTP.get("#{get_url()}/loggregate/_count") do
+      {:ok, %HTTPoison.Response{status_code: 200} = res} ->
+        res.body["count"]
+      _res ->
+        0
     end
   end
 end

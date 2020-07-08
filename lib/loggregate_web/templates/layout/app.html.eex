@@ -6,9 +6,16 @@
                     <div class="card-content">
                         <div class="level">
                             <div class="level-item">
-                                <a href="<%= Routes.search_path(@conn, :index) %>">
-                                    <p class="title has-text-dark">Loggregate</p>
-                                </a>
+                                <p class="title is-1 has-text-dark">
+                                    <a class="has-text-info"href="<%= Routes.search_path(@conn, :index) %>">
+                                        Loggregate
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="level">
+                            <div class="level-item">
+                                <p class="subtitle is-4 has-text-dark">Indexing <%= Number.Delimit.number_to_delimited(@count, precision: 0) %> log entries</p>
                             </div>
                         </div>
                         <div class="level">

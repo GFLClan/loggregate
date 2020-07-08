@@ -8,7 +8,7 @@ defmodule Loggregate.Application do
   def start(_type, _args) do
     # TODO: Move this to a manager process
     Loggregate.ElasticSearch.create_index!()
-    Loggregate.ElasticSearch.update_mapping!()
+    Loggregate.ElasticSearch.update_settings!()
 
     import Supervisor.Spec
 

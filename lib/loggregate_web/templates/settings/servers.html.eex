@@ -20,3 +20,13 @@
         <% end %>
     </tbody>
 </table>
+<div class="field is-grouped is-grouped-right">
+  <div class="control">
+    <a href="<%= Routes.settings_path(@conn, :new_server) %>" class="button is-info">
+        <span class="icon is-small">
+            <i class="fas fa-plus"></i>
+        </span>
+        <span>New Server</span>
+    </a>
+  </div>
+</div>

@@ -5,7 +5,7 @@ defmodule Loggregate.LogReceiver.Parsers.Rcon do
   def parse(message) do
     if Regex.match?(@rcon_regex, message) do
       [_, address, port, command] = Regex.run(@rcon_regex, message)
-      {:ok, %{line: message, type: :rcon, message: command, from_addr: %{address: address, port: port}}}
+      {:ok, %{line: message, type: :rcon, command: command, from_addr: %{address: address, port: port}}}
     else
       :no_match
     end
