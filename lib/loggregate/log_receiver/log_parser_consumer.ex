@@ -2,6 +2,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   use GenStage
 
   alias Loggregate.LogReceiver.ParsedLogEntry
+  alias Loggregate.ServerMapping
 
   def start_link() do
     GenStage.start_link(__MODULE__, :ok)
@@ -12,7 +13,8 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   end
 
   def handle_events(events, _from, state) do
-    GenStage.cast(Loggregate.LogReceiver.LogIngestBroadcaster, {:parsed_entries, Enum.map(events, &(log_msg_passwd(&1)))})
+    parsed_events = Enum.map(events, &(log_msg_passwd(&1))) |> Enum.filter(&(&1 !== :error))
+    GenStage.cast(Loggregate.LogReceiver.LogIngestBroadcaster, {:parsed_entries, parsed_events})
 
     {:noreply, [], state}
   end
@@ -20,15 +22,20 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   def log_msg_passwd({data, {address, port}}) do
     [password, message] = :binary.split(data, "L")
     {server_id, _} = Integer.parse(password)
-    {timestamp, log_data} = parse(message)
+    case Cachex.get(:ingest_server_cache, server_id) do
+      {:ok, nil} -> :error
+      {:ok, index} ->
+        {timestamp, log_data} = parse(message)
 
-    %ParsedLogEntry{
-      server_id: server_id,
-      address: address,
-      port: port,
-      timestamp: timestamp,
-      log_data: log_data
-    }
+        %ParsedLogEntry{
+          server_id: server_id,
+          address: address,
+          port: port,
+          timestamp: timestamp,
+          log_data: log_data,
+          index: index.name
+        }
+    end
   end
 
   def parse(line) do

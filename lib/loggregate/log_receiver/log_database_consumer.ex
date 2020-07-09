@@ -12,7 +12,7 @@ defmodule Loggregate.LogReceiver.LogDatabaseConsumer do
 
   def handle_events(events, _from, state) do
     entries = Enum.map(events, fn %ParsedLogEntry{} = entry ->
-      %{server_id: server_id, address: address, port: port, timestamp: timestamp, log_data: log_data} = entry
+      %{server_id: server_id, address: address, port: port, timestamp: timestamp, log_data: log_data, index: index} = entry
       ip_address = to_string(:inet_parse.ntoa(address))
 
       log_data
@@ -21,6 +21,7 @@ defmodule Loggregate.LogReceiver.LogDatabaseConsumer do
         |> Map.put_new(:port, port)
         |> Map.put_new(:server_time, timestamp)
         |> Map.put_new(:timestamp, NaiveDateTime.utc_now())
+        |> Map.put_new(:index, index)
     end)
     Loggregate.ElasticSearch.insert!(entries)
 

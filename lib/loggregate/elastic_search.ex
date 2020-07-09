@@ -73,55 +73,77 @@ defmodule Loggregate.ElasticSearch do
     }
   }
 
-  @settings %{
-    settings: %{
-      "index.lifecycle.rollover_alias": "loggregate",
-      "index.lifecycle.name": "loggregate_policy"
-    },
-    aliases: %{
-      loggregate: %{
-        is_write_index: true
+  defmacro settings(index) do
+    quote do
+      %{
+        settings: %{
+          "index.lifecycle.rollover_alias": "loggregate_#{unquote(index)}",
+          "index.lifecycle.name": "loggregate_#{unquote(index)}_policy"
+        },
+        aliases: %{
+          "loggregate_#{unquote(index)}": %{
+            is_write_index: true
+          }
+        }
       }
-    }
-  }
+    end
+  end
 
-  @template %{
-    index_patterns: ["loggregate-*"],
-    template: %{
-      settings: %{
-        "index.lifecycle.rollover_alias": "loggregate",
-        "index.lifecycle.name": "loggregate_policy"
-      },
-      mappings: @mapping
-    }
-  }
+  defmacro template(index) do
+    quote do
+      %{
+        index_patterns: ["loggregate_#{unquote(index)}-*"],
+        template: %{
+          settings: %{
+            "index.lifecycle.rollover_alias": "loggregate_#{unquote(index)}",
+            "index.lifecycle.name": "loggregate_#{unquote(index)}_policy"
+          },
+          mappings: @mapping
+        }
+      }
+    end
+  end
+
+  use Task
+  alias Loggregate.Indices
+
+  def start_link(_) do
+    Task.start_link(__MODULE__, :create_indices, [])
+  end
+
+  def create_indices() do
+    Indices.list_indices() |> Enum.map(fn index ->
+      create_index!(index.name)
+      update_settings!(index.name)
+    end)
+  end
 
   def get_url() do
     [elasticsearch_url: url] = Application.fetch_env!(:loggregate, Loggregate.ElasticSearch)
     url
   end
 
-  def update_settings!() do
-    case Elastix.HTTP.get("#{get_url()}/_ilm/policy/loggregate_policy") do
+  def update_settings!(index) do
+    case Elastix.HTTP.get("#{get_url()}/_ilm/policy/loggregate_#{index}_policy") do
       {:ok, %HTTPoison.Response{status_code: 200} = _resp} -> nil
       {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_ilm/policy/loggregate_policy", Poison.encode!(@policy))
+        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_ilm/policy/loggregate_#{index}_policy", Poison.encode!(@policy))
     end
 
-    {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_index_template/loggregate_template", Poison.encode!(@template))
+    {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_index_template/loggregate_#{index}_template", Poison.encode!(template(index)))
   end
 
-  def create_index!() do
-    case Elastix.Index.get(get_url(), "loggregate") do
+  def create_index!(index) do
+    case Elastix.Index.get(get_url(), "loggregate_#{index}") do
       {:ok, %HTTPoison.Response{status_code: 200} = _resp} -> nil
       {:ok, %HTTPoison.Response{status_code: 404} = _resp} ->
-        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/loggregate-000001", Poison.encode!(@settings))
+        {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/loggregate_#{index}-000001", Poison.encode!(settings(index)))
     end
   end
 
   def insert!(entries) do
-    entries = Enum.flat_map(entries, &([%{index: %{_index: "loggregate"}}, &1]))
-    {:ok, %HTTPoison.Response{status_code: 200} = _res} = Elastix.Bulk.post(get_url(), entries, index: "loggregate")
+    entries = Enum.flat_map(entries, &([%{index: %{_index: &1.index}}, &1]))
+    {:ok, %HTTPoison.Response{status_code: 200} = _res} = Elastix.Bulk.post(get_url(), entries)
   end
 
   def get_log_entries() do
@@ -157,8 +179,8 @@ defmodule Loggregate.ElasticSearch do
     end
   end
 
-  def get_index_count() do
-    case Elastix.HTTP.get("#{get_url()}/loggregate/_count") do
+  def get_index_count(indices) do
+    case Elastix.HTTP.get("#{get_url()}/#{Enum.join(indices, ",")}/_count") do
       {:ok, %HTTPoison.Response{status_code: 200} = res} ->
         res.body["count"]
       _res ->

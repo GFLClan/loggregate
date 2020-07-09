@@ -50,7 +50,8 @@ defmodule Loggregate.MixProject do
       {:steamex, "~> 0.0.9"},
       {:elastix, "~> 0.8.0"},
       {:poison, "~> 4.0"},
-      {:number, "~> 1.0"}
+      {:number, "~> 1.0"},
+      {:cachex, "~> 3.2"}
     ]
   end
 

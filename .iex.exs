@@ -1,3 +1,5 @@
+import Ecto.Query
 alias Loggregate.Repo
-alias Loggregate.LogEntry
-alias Loggregate.LogSearch
+alias Loggregate.Accounts
+alias Loggregate.ServerMapping
+alias Loggregate.Indices
