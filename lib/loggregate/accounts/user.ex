@@ -6,11 +6,7 @@ defmodule Loggregate.Accounts.User do
     field :steamid, :string
     field :name, :string
     field :admin, :boolean
-    has_many :index_access, Loggregate.Indices.UserAccess, references: :steamid, foreign_key: :user_id
-    has_many :indices, through: [:index_access, :index]
-    has_many :server_access, Loggregate.ServerMapping.UserAccess, references: :steamid, foreign_key: :user_id
-    has_many :servers, through: [:server_access, :server]
-    has_many :parent_indices, Loggregate.Indices.SubUser, references: :steamid, foreign_key: :user_id
+    has_many :acl, Loggregate.Accounts.ACLEntry, references: :steamid, foreign_key: :user_id
 
     timestamps()
   end

@@ -9,25 +9,36 @@ defmodule Loggregate.Permissions do
   def user_can_search(%User{admin: true} = _user, _) do
     true
   end
+
   def user_can_search(%User{} = user, %ServerMapping{} = server) do
     cond do
-      Enum.any?(user.indices, &(&1.name == server.index.name)) -> true
-      Enum.any?(user.servers, &(&1.server_id == server.server_id)) -> true
+      Enum.any?(user.acl, &(&1.index_id == server.index_id)) -> true
+      Enum.any?(user.acl, &(&1.server_id == server.server_id)) -> true
       true -> false
     end
   end
 
   def user_can_search(%User{} = user, %Index{} = index) do
-    cond do
-      Enum.any?(user.indices, &(&1.name == index.name)) -> true
-      Enum.any?(user.parent_indices, &(&1.name == index.name)) -> true
-      true -> false
-    end
+    Enum.any?(user.acl, &(&1.index_id == index.id))
   end
 
   def user_can_search(_, _), do: false
 
-  def get_search_indexes(%User{} = user) do
+  def user_can_manage(%User{admin: true} = _user, _) do
+    true
+  end
+
+  def user_can_manage(%User{} = user, %Index{} = index) do
+    Enum.any?(user.acl, &(&1.index_id == index.id and &1.index_access == "manage"))
+  end
+
+  def user_can_manage(%User{} = user, %ServerMapping{} = server) do
+    Enum.any?(user.acl, &(&1.server_id == server.server_id and &1.server_access == "manage"))
+  end
+
+  def user_can_manage(_, _), do: false
+
+  def get_search_indices(%User{} = user) do
     Indices.list_indices() |> Enum.filter(&(user_can_search(user, &1)))
   end
 
@@ -54,18 +65,4 @@ defmodule Loggregate.Permissions do
       end
     end
   end
-
-  def user_can_manage(%User{admin: true} = _user, _) do
-    true
-  end
-
-  def user_can_manage(%User{} = user, %Index{} = index) do
-    cond do
-      user.admin -> true
-      Enum.any?(user.indices, &(&1.name == index.name)) -> true
-      true -> false
-    end
-  end
-
-  def user_can_manage(_, _), do: false
 end

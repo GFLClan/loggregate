@@ -100,12 +100,10 @@ defmodule LoggregateWeb.SettingsController do
   end
 
   def create_server(conn, %{"server_mapping" => server}) do
-    %{"index_name" => index_name} = server
     case ServerMapping.create_server_mapping(server) do
       {:ok, server} ->
-        {:ok, index_mapping} = Indices.create_index_server(%{server_id: server.server_id, index_name: index_name})
-        index_mapping = Loggregate.Repo.preload(index_mapping, :index)
-        Cachex.put(:ingest_server_cache, server.server_id, index_mapping.index)
+        server = Loggregate.Repo.preload(server, :index)
+        Cachex.put(:ingest_server_cache, server.server_id, server.index)
 
         redirect(conn, to: Routes.settings_path(conn, :server, server))
       {:error, %Ecto.Changeset{} = changeset} ->

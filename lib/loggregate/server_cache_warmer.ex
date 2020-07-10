@@ -5,6 +5,6 @@ defmodule Loggregate.ServerCacheWarmer do
   def interval, do: :timer.minutes(5)
 
   def execute(_state) do
-    {:ok, ServerMapping.list_servers() |> Enum.map(&({&1.server_id, &1.index}))}
+    {:ok, ServerMapping.list_servers()}
   end
 end

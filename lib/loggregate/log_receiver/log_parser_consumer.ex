@@ -24,7 +24,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     {server_id, _} = Integer.parse(password)
     case Cachex.get(:ingest_server_cache, server_id) do
       {:ok, nil} -> :error
-      {:ok, index} ->
+      {:ok, server} ->
         case parse(message) do
           {timestamp, log_data} ->
             %ParsedLogEntry{
@@ -33,7 +33,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
               port: port,
               timestamp: timestamp,
               log_data: log_data,
-              index: index.name
+              index: server.index.name
             }
           _ -> :error
         end

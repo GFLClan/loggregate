@@ -7,7 +7,7 @@ defmodule LoggregateWeb.SearchController do
   def index(conn, %{"query" => query, "date_range" => date_range, "from" => from} = _params) do
     {start_date, end_date} = parse_date_range(date_range)
     {from, _} = Integer.parse(from)
-    indices = Permissions.get_search_indexes(conn.assigns[:user]) |> Enum.map(&(&1.name))
+    indices = Permissions.get_search_indices(conn.assigns[:user]) |> Enum.map(&(&1.name))
 
     results = ElasticSearch.get_log_entries(indices, LogSearch.build_es_query(query, {start_date, end_date}, conn.assigns[:user]), from)
     render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: query, next_page: from + 50)
@@ -15,7 +15,7 @@ defmodule LoggregateWeb.SearchController do
 
   def index(conn, %{"query" => query, "date_range" => date_range} = _params) do
     {start_date, end_date} = parse_date_range(date_range)
-    indices = Permissions.get_search_indexes(conn.assigns[:user]) |> Enum.map(&(&1.name))
+    indices = Permissions.get_search_indices(conn.assigns[:user]) |> Enum.map(&(&1.name))
 
     results = ElasticSearch.get_log_entries(indices, LogSearch.build_es_query(query, {start_date, end_date}, conn.assigns[:user]), 0)
     render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: query, next_page: 50)
@@ -23,7 +23,7 @@ defmodule LoggregateWeb.SearchController do
 
   def index(conn, _params) do
     {start_date, end_date} = default_date_range()
-    indices = Permissions.get_search_indexes(conn.assigns[:user]) |> Enum.map(&(&1.name))
+    indices = Permissions.get_search_indices(conn.assigns[:user]) |> Enum.map(&(&1.name))
 
     results = ElasticSearch.get_log_entries(indices, LogSearch.build_es_query("", {start_date, end_date}, conn.assigns[:user]), 0)
     render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: "")
