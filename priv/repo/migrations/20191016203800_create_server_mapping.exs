@@ -9,6 +9,5 @@ defmodule Loggregate.Repo.Migrations.CreateServerMapping do
       timestamps()
     end
     create index(:server_mapping, [:server_name], unique: true)
-
   end
 end

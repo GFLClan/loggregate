@@ -2,6 +2,7 @@ defmodule LoggregateWeb.SettingsController do
   use LoggregateWeb, :controller
   alias Loggregate.Accounts
   alias Loggregate.ServerMapping
+  alias Loggregate.Indices
 
   def users(conn, _params) do
     users = Accounts.list_users()
@@ -95,12 +96,17 @@ defmodule LoggregateWeb.SettingsController do
   def new_server(conn, _params) do
     <<server_id::unsigned-24>> = :crypto.strong_rand_bytes(3)
     changeset = %ServerMapping.ServerMapping{} |> ServerMapping.ServerMapping.changeset(%{server_id: server_id})
-    render(conn, "new_server.html", changeset: changeset, settings: :servers)
+    render(conn, "new_server.html", changeset: changeset, indices: Indices.list_indices(), settings: :servers)
   end
 
   def create_server(conn, %{"server_mapping" => server}) do
+    %{"index_name" => index_name} = server
     case ServerMapping.create_server_mapping(server) do
       {:ok, server} ->
+        {:ok, index_mapping} = Indices.create_index_server(%{server_id: server.server_id, index_name: index_name})
+        index_mapping = Loggregate.Repo.preload(index_mapping, :index)
+        Cachex.put(:ingest_server_cache, server.server_id, index_mapping.index)
+
         redirect(conn, to: Routes.settings_path(conn, :server, server))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new_server.html", changeset: changeset, settings: :servers)

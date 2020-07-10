@@ -15,6 +15,12 @@
     <p class="help">This will be your <code>sv_logsecret</code> value. Some Source games only support numeric values.</p>
   </div>
 </div>
+<div class="field">
+  <label class="label">Index</label>
+  <div class="control">
+    <%= select f, :index_name, Enum.map(@indices, &(&1.name)), class: "input" %>
+  </div>
+</div>
 <div class="field is-grouped">
   <div class="control">
     <button class="button is-info">Submit</button>

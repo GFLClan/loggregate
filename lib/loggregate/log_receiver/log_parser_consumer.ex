@@ -25,28 +25,34 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     case Cachex.get(:ingest_server_cache, server_id) do
       {:ok, nil} -> :error
       {:ok, index} ->
-        {timestamp, log_data} = parse(message)
-
-        %ParsedLogEntry{
-          server_id: server_id,
-          address: address,
-          port: port,
-          timestamp: timestamp,
-          log_data: log_data,
-          index: index.name
-        }
+        case parse(message) do
+          {timestamp, log_data} ->
+            %ParsedLogEntry{
+              server_id: server_id,
+              address: address,
+              port: port,
+              timestamp: timestamp,
+              log_data: log_data,
+              index: index.name
+            }
+          _ -> :error
+        end
     end
   end
 
   def parse(line) do
     trimmed_line = String.slice(line, 0..-2) |> String.trim()
-    [_, month, day, year, hour, minute, second, message] = Regex.run(~r/^(\d+)\/(\d+)\/(\d+)\s+-\s+(\d+):(\d+):(\d+):\s*(.*)$/, trimmed_line)
-    [month, day, year, hour, minute, second] = Enum.map([month, day, year, hour, minute, second], fn i ->
-      {int, _} = Integer.parse(i)
-      int
-    end)
-    {:ok, timestamp} = NaiveDateTime.from_erl({{year, month, day}, {hour, minute, second}})
-    {timestamp, parse_message(message)}
+    with [_, month, day, year, hour, minute, second, message] <- Regex.run(~r/^(\d+)\/(\d+)\/(\d+)\s+-\s+(\d+):(\d+):(\d+):\s*(.*)$/, trimmed_line),
+      [month, day, year, hour, minute, second] <- Enum.map([month, day, year, hour, minute, second], fn i ->
+        {int, _} = Integer.parse(i)
+        int
+      end),
+      {:ok, timestamp} <- NaiveDateTime.from_erl({{year, month, day}, {hour, minute, second}})
+    do
+      {timestamp, parse_message(message)}
+    else
+      _ -> :error
+    end
   end
 
   alias Loggregate.LogReceiver.Parsers

@@ -40,7 +40,7 @@ defmodule Loggregate.Accounts do
   def get_user(id), do: Repo.get(User, id)
 
   def get_by_steamid(steamid) do
-    Repo.one(from u in User, where: u.steamid == ^to_string(steamid))
+    Repo.one(from u in User, where: u.steamid == ^to_string(steamid), preload: [:indices, :servers, :parent_indices])
   end
 
   @doc """

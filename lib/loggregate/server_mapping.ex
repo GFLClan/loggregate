@@ -16,7 +16,7 @@ defmodule Loggregate.ServerMapping do
   end
 
   def search_by_server_ids(ids) do
-    Repo.all(from s in ServerMapping, where: s.server_id in ^ids)
+    Repo.all(from s in ServerMapping, where: s.server_id in ^ids, preload: [:index])
   end
 
   def search_by_server_name(name) do

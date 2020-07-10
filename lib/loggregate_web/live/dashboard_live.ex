@@ -1,15 +1,16 @@
 defmodule LoggregateWeb.DashboardLive do
   use Phoenix.LiveView, layout: {LoggregateWeb.LayoutView, "live.html"}
   alias Loggregate.LogSearch
+  alias Loggregate.Accounts
 
-  def mount(_params, _assigns, socket) do
+  def mount(_params, session, socket) do
     socket = if connected?(socket) do
       {:ok, consumer} = Loggregate.LogReceiver.LiveViewConsumer.start_link(self())
       {:ok, tag} = GenStage.sync_subscribe(consumer, to: Loggregate.LogReceiver.LogIngestBroadcaster, cancel: :transient)
       case get_connect_params(socket) do
         %{"hash" => <<"#", hash::binary>>} ->
           query = URI.decode(to_string(hash))
-          predicate = LogSearch.build_search_predicate(query)
+          predicate = LogSearch.build_search_predicate(query, socket.assigns[:user])
 
           assign(socket, consumer: consumer, subscription_tag: tag, filter: query, predicate: predicate)
         params ->
@@ -19,6 +20,18 @@ defmodule LoggregateWeb.DashboardLive do
       end
     else
       assign(socket, filter: "", predicate: fn _entry -> true end)
+    end
+
+    steamid = session["steamex_steamid64"]
+    socket = if steamid != nil do
+      case Accounts.get_by_steamid(steamid) do
+        %Loggregate.Accounts.User{} = user ->
+          assign(socket, :user, user)
+        _ ->
+          socket
+      end
+    else
+      socket
     end
 
     {:ok, assign(socket, entries: [], paused: false), temporary_assigns: [entries: []]}
@@ -40,7 +53,7 @@ defmodule LoggregateWeb.DashboardLive do
   end
 
   def handle_event("update_filter", %{"query" => query}, socket) do
-    predicate = LogSearch.build_search_predicate(query)
+    predicate = LogSearch.build_search_predicate(query, socket.assigns[:user])
 
     {:noreply, assign(socket, filter: query, predicate: predicate)}
   end

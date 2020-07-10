@@ -16,10 +16,10 @@ table.table.is-fullwidth
     th Timestamp
     th Server
     th Line
-  = for %{"_id" => id, "_source" => source, server_name: server_name} <- @results do
+  = for %{"_id" => id, "_source" => source, server_name: server_name, index: index} <- @results do
     tr
       td width="20%"
-        a href=Routes.search_path(@conn, :log_detail, id)
+        a href=Routes.search_path(@conn, :log_detail, index, id)
           = source["timestamp"]
       td width="20%"
         = server_name

@@ -1,15 +1,18 @@
 defmodule Loggregate.LogSearch do
   alias Loggregate.ServerMapping
   alias Loggregate.LogReceiver.ParsedLogEntry
+  alias Loggregate.Accounts.User
+  alias Loggregate.Permissions
 
   def parse_search_string(search_string) do
     OptionParser.parse(OptionParser.split(search_string), strict: [type: :string, cvar: :string, server: :string, name: :string, steamid: :string, address: :string])
   end
 
-  def build_es_query(search_string, {start_date, end_date}) do
+  def build_es_query(search_string, {start_date, end_date}, %User{} = user) do
     {opts, args, _} = parse_search_string(search_string)
     conditions = []
     filter = [%{range: %{timestamp: %{gte: start_date, lte: end_date}}}]
+    filter = filter ++ Permissions.get_es_permissions_filter(user)
 
     conditions = unless opts[:cvar] == nil do
       [%{match: %{"cvar.name": %{query: opts[:cvar]}}} | conditions]
@@ -56,11 +59,15 @@ defmodule Loggregate.LogSearch do
     %{bool: %{must: conditions, filter: filter}}
   end
 
-  def build_search_predicate(search_string) do
-    {opts, args, _} = parse_search_string(search_string)
-    predicate = fn %ParsedLogEntry{} = _entry ->
-      true
+  def build_search_predicate(_, nil) do
+    fn _ ->
+      false
     end
+  end
+
+  def build_search_predicate(search_string, %User{} = user) do
+    {opts, args, _} = parse_search_string(search_string)
+    predicate = Permissions.get_permissions_predicate(user)
 
     predicate = unless opts[:cvar] == nil do
       predicate_cvar(opts[:cvar], predicate)

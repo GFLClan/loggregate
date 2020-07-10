@@ -31,7 +31,7 @@ defmodule LoggregateWeb.Router do
     pipe_through :authenticate
 
     get "/", SearchController, :index
-    get "/log/:log_id", SearchController, :log_detail
+    get "/log/:index/:log_id", SearchController, :log_detail
     live "/live", DashboardLive
 
     scope "/settings" do

@@ -2,7 +2,8 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>name</th>
+            <th>Name</th>
+            <th>Index</th>
             <th></th>
         </tr>
     </thead>
@@ -11,6 +12,7 @@
             <tr>
                 <td><%= server.server_id %></td>
                 <td><%= server.server_name %></td>
+                <td><%= server.index.name %>
                 <td>
                     <a class="icon" href="<%= Routes.settings_path(@conn, :server, server.id) %>">
                         <i class="fas fa-cog"></i>

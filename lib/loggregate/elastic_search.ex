@@ -106,6 +106,7 @@ defmodule Loggregate.ElasticSearch do
 
   use Task
   alias Loggregate.Indices
+  require Logger
 
   def start_link(_) do
     Task.start_link(__MODULE__, :create_indices, [])
@@ -146,16 +147,9 @@ defmodule Loggregate.ElasticSearch do
     {:ok, %HTTPoison.Response{status_code: 200} = _res} = Elastix.Bulk.post(get_url(), entries)
   end
 
-  def get_log_entries() do
-    get_log_entries(%{match_all: %{}}, 0)
-  end
-
-  def get_log_entries(conditions) do
-    get_log_entries(conditions, 0)
-  end
-
-  def get_log_entries(conditions, from) do
-    case Elastix.Search.search(get_url(), "loggregate", [], %{
+  def get_log_entries(indices, conditions, from) do
+    Logger.debug("Searching indices #{Enum.join(indices, ",")} #{Poison.encode!(conditions)}")
+    case Elastix.Search.search(get_url(), Enum.join(indices, ","), [], %{
       query: conditions,
       sort: [
         %{timestamp: "desc"}
@@ -170,8 +164,8 @@ defmodule Loggregate.ElasticSearch do
     end
   end
 
-  def get(id) do
-    case Elastix.HTTP.get("#{get_url()}/loggregate/_doc/#{id}") do
+  def get(index, id) do
+    case Elastix.HTTP.get("#{get_url()}/#{index}/_doc/#{id}") do
       {:ok, %HTTPoison.Response{status_code: 200} = res} ->
         res.body
       _res ->
