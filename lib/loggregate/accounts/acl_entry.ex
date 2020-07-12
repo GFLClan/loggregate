@@ -5,9 +5,11 @@ defmodule Loggregate.Accounts.ACLEntry do
   schema "acl" do
     field :index_access, :string
     field :server_access, :string
+    field :user_access, :string
     belongs_to :user, Loggregate.Accounts.User, references: :steamid, type: :string
     belongs_to :server, Loggregate.ServerMapping.ServerMapping, references: :server_id
     belongs_to :index, Loggregate.Indices.Index
+    belongs_to :target_user, Loggregate.Accounts.User, references: :steamid, type: :string
 
     timestamps()
   end

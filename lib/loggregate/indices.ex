@@ -37,6 +37,8 @@ defmodule Loggregate.Indices do
   """
   def get_index!(id), do: Repo.get!(Index, id)
 
+  def get_index(id), do: Repo.get(Index, id)
+
   @doc """
   Creates a index.
 

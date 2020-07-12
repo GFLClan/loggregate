@@ -18,7 +18,7 @@
 <div class="field">
   <label class="label">Index</label>
   <div class="control">
-    <%= select f, :index_name, Enum.map(@indices, &(&1.name)), class: "input" %>
+    <%= select f, :index_id, Enum.map(@indices, &{&1.name, &1.id}), class: "input" %>
   </div>
 </div>
 <div class="field is-grouped">

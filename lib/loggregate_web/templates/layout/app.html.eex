@@ -28,12 +28,14 @@
                                         <span>Dashboard</span>
                                     </a>
                                 <% else %>
-                                    <a class="button is-info mr-2" href="<%= Routes.settings_path(@conn, :users) %>">
-                                        <span class="icon is-small">
-                                            <i class="fas fa-cog"></i>
-                                        </span>
-                                        <span>Settings</span>
-                                    </a>
+                                    <%= if Loggregate.Permissions.has_settings?(@user) do %>
+                                        <a class="button is-info mr-2" href="<%= Routes.settings_path(@conn, :users) %>">
+                                            <span class="icon is-small">
+                                                <i class="fas fa-cog"></i>
+                                            </span>
+                                            <span>Settings</span>
+                                        </a>
+                                    <% end %>
                                 <% end %>
                                 <a class="button is-info mr-2" href="<%= Routes.live_path(@conn, LoggregateWeb.DashboardLive) %>">
                                     <span class="icon is-small">
@@ -73,6 +75,12 @@
                                                 <i class="fas fa-server"></i>
                                             </span>
                                             Servers
+                                        </a>
+                                        <a class="panel-block <%= if assigns[:settings] == :indices do "is-active" end %>" href="<%= Routes.settings_path(@conn, :indices) %>">
+                                            <span class="panel-icon">
+                                                <i class="fas fa-database"></i>
+                                            </span>
+                                            Indices
                                         </a>
                                     </article>
                                 </div>

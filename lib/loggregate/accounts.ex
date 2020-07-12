@@ -37,7 +37,7 @@ defmodule Loggregate.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
-  def get_user(id), do: Repo.get(User, id)
+  def get_user(id), do: Repo.one(from u in User, where: u.id == ^id, preload: [:acl])
 
   def get_by_steamid(steamid) do
     Repo.one(from u in User, where: u.steamid == ^to_string(steamid), preload: [acl: [:server, :index]])

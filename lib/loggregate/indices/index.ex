@@ -4,6 +4,9 @@ defmodule Loggregate.Indices.Index do
 
   schema "indices" do
     field :name, :string
+    has_many :user_mappings, Loggregate.Accounts.ACLEntry
+    has_many :managed_users, through: [:user_mappings, :target_user]
+    has_many :servers, Loggregate.ServerMapping.ServerMapping
 
     timestamps()
   end

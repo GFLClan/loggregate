@@ -51,6 +51,8 @@ defmodule LoggregateWeb.Router do
       put "/servers/:id", SettingsController, :save_server
       post "/servers/:id/refresh_token", SettingsController, :refresh_server_token
       delete "/servers/:id", SettingsController, :delete_server
+
+      get "/indices", SettingsController, :indices
     end
   end
 

@@ -23,6 +23,12 @@
     </label>
   </div>
 </div>
+<div>
+  <h4>User Indices</h4>
+  <div class="select is-multiple">
+    <%= select f, :indices, Enum.map(@indices, &{&1.name, &1.id}) %>
+  </div>
+</div>
 <div class="field is-grouped">
   <div class="control">
     <button class="button is-info">Submit</button>

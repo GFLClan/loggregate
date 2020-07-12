@@ -2,13 +2,26 @@ defmodule Loggregate.Permissions do
   alias Loggregate.Accounts.User
   alias Loggregate.ServerMapping.ServerMapping
   alias Loggregate.ServerMapping, as: Servers
+  alias Loggregate.{Indices, Accounts}
   alias Loggregate.Indices.Index
-  alias Loggregate.Indices
   alias Loggregate.LogReceiver.ParsedLogEntry
 
-  def user_can_search(%User{admin: true} = _user, _) do
-    true
+  defmacro user_has_permission(conn, resource, permission, body) do
+    quote location: :keep do
+      import Loggregate.Permissions
+      user = unquote(conn).assigns[:user]
+      case unquote(permission) do
+        :manage ->
+          if user_can_manage(user, unquote(resource)) do
+            unquote(body[:do])
+          else
+            raise Loggregate.PermissionError
+          end
+      end
+    end
   end
+
+  def user_can_search(%User{admin: true} = _user, _), do: true
 
   def user_can_search(%User{} = user, %ServerMapping{} = server) do
     cond do
@@ -24,9 +37,7 @@ defmodule Loggregate.Permissions do
 
   def user_can_search(_, _), do: false
 
-  def user_can_manage(%User{admin: true} = _user, _) do
-    true
-  end
+  def user_can_manage(%User{admin: true} = _user, _), do: true
 
   def user_can_manage(%User{} = user, %Index{} = index) do
     Enum.any?(user.acl, &(&1.index_id == index.id and &1.index_access == "manage"))
@@ -46,9 +57,37 @@ defmodule Loggregate.Permissions do
     Servers.list_servers() |> Enum.filter(&(user_can_search(user, &1)))
   end
 
-  def get_es_permissions_filter(%User{admin: true} = _user) do
-    []
+  def get_managed_users(%User{admin: true} = _user) do
+    Accounts.list_users()
   end
+
+  def get_managed_users(%User{} = user) do
+    direct_users = Enum.filter(user.acl, &(&1.user_access == "manage")) |> Enum.map(&(&1.target_user))
+    index_users = Enum.filter(user.acl, &(&1.index_access == "manage")) |> Enum.flat_map(&(&1.managed_users))
+
+    direct_users ++ index_users
+  end
+
+  def get_managed_servers(%User{admin: true} = _user) do
+    Servers.list_servers()
+  end
+
+  def get_managed_servers(%User{} = user) do
+    direct_servers = Enum.filter(user.acl, &(&1.server_access == "manage")) |> Enum.map(&(&1.server))
+    index_servers = Enum.filter(user.acl, &(&1.index_access == "manage")) |> Enum.flat_map(&(&1.servers))
+
+    direct_servers ++ index_servers
+  end
+
+  def get_managed_indices(%User{admin: true} = _user) do
+    Indices.list_indices()
+  end
+
+  def get_managed_indices(%User{} = user) do
+    Enum.filter(user.acl, &(&1.index_access == "manage")) |> Enum.map(&(&1.index))
+  end
+
+  def get_es_permissions_filter(%User{admin: true} = _user), do: []
 
   def get_es_permissions_filter(%User{} = user) do
     servers = get_search_servers(user)
@@ -64,5 +103,19 @@ defmodule Loggregate.Permissions do
         true -> false
       end
     end
+  end
+
+  def has_settings?(%User{admin: true} = _user), do: true
+
+  def has_settings?(%User{} = user) do
+    Enum.any?(user.acl, &(&1.server_access == "manage" or &1.index_access == "manage"))
+  end
+
+  def has_settings?(_user), do: false
+
+  def sanitize_changeset(%Ecto.Changeset{} = changeset, %{assigns: %{user: %{admin: true} = _user}} = _conn), do: changeset
+
+  def sanitize_changeset(%Ecto.Changeset{} = changeset, %{assigns: %{user: _user}} = _conn) do
+    Ecto.Changeset.delete_change(changeset, :admin)
   end
 end
