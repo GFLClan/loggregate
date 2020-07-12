@@ -1,0 +1,32 @@
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <%= for index <- @indices do %>
+            <tr>
+                <td><%= index.id %></td>
+                <td><%= index.name %></td>
+                <td>
+                    <a class="icon" href="<%= Routes.settings_path(@conn, :indices) %>">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+<div class="field is-grouped is-grouped-right">
+  <div class="control">
+    <a href="<%= Routes.settings_path(@conn, :new_server) %>" class="button is-info">
+        <span class="icon is-small">
+            <i class="fas fa-plus"></i>
+        </span>
+        <span>New Index</span>
+    </a>
+  </div>
+</div>
