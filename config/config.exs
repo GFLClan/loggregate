@@ -26,6 +26,13 @@ config :elastix,
   username: "elastic",
   password: "9KockPcnwY6dH6ZZKhur"
 
+maxmind_key = System.get_env("MAXMIND_KEY")
+if maxmind_key do
+  config :locus, :license_key, maxmind_key
+else
+  config :locus, :license_key, nil
+end
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

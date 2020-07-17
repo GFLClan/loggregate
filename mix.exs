@@ -4,7 +4,7 @@ defmodule Loggregate.MixProject do
   def project do
     [
       app: :loggregate,
-      version: "1.0.1",
+      version: "1.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
@@ -50,7 +50,8 @@ defmodule Loggregate.MixProject do
       {:steamex, "~> 0.0.9"},
       {:elastix, "~> 0.8.0"},
       {:poison, "~> 4.0"},
-      {:number, "~> 1.0"}
+      {:number, "~> 1.0"},
+      {:locus, "~> 1.12"}
     ]
   end
 

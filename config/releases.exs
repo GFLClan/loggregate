@@ -34,15 +34,20 @@ elastic_user =
   System.get_env("ELASTIC_USER") ||
     raise """
     environment variable ELASTIC_USER is missing.
-    You can generate one by calling: mix phx.gen.secret
+    You must provide an ElasticSearch user
     """
 
 elastic_password =
   System.get_env("ELASTIC_PASSWORD") ||
     raise """
     environment variable ELASTIC_PASSWORD is missing.
-    You can generate one by calling: mix phx.gen.secret
+    You must provide an ElasticSearch user
     """
+
+maxmind_key = System.get_env("MAXMIND_KEY")
+if maxmind_key do
+  config: :locus, :license_key maxmind_key
+end
 
 config :loggregate, LoggregateWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],

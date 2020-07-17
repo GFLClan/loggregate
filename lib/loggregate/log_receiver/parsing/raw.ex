@@ -4,7 +4,7 @@ defmodule Loggregate.LogReceiver.Parsers.Raw do
 
   def parse(message) do
     case Parsers.Who.parse(message) do
-      {:ok, [name, steamid]} -> {:ok, %{line: message, type: :raw, who: %{steamid: steamid, name: name}}}
+      {:ok, who} -> {:ok, %{line: message, type: :raw, who: who}}
       _ -> {:ok, %{line: message, type: :raw}}
     end
   end

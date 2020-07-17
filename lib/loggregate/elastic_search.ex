@@ -27,8 +27,10 @@ defmodule Loggregate.ElasticSearch do
             type: "text",
             analyzer: "simple"
           },
+          name_kw: %{type: "keyword"},
           address: %{type: "ip"},
-          port: %{type: "long"}
+          port: %{type: "long"},
+          location: %{type: "geo_point"}
         }
       },
       cvar: %{
@@ -46,6 +48,7 @@ defmodule Loggregate.ElasticSearch do
       from_addr: %{
         properties: %{
           address: %{type: "ip"},
+          location: %{type: "geo_point"},
           port: %{type: "long"}
         }
       }
