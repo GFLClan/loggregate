@@ -30,10 +30,29 @@ live_view_salt =
     You can generate one by calling: mix phx.gen.secret
     """
 
+elastic_user =
+  System.get_env("ELASTIC_USER") ||
+    raise """
+    environment variable ELASTIC_USER is missing.
+    You can generate one by calling: mix phx.gen.secret
+    """
+
+elastic_password =
+  System.get_env("ELASTIC_PASSWORD") ||
+    raise """
+    environment variable ELASTIC_PASSWORD is missing.
+    You can generate one by calling: mix phx.gen.secret
+    """
+
 config :loggregate, LoggregateWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
   secret_key_base: secret_key_base,
   live_view: [signing_salt: live_view_salt]
+
+config :elastix,
+  shield: true,
+  username: elastic_user,
+  password: elastic_password
 
 # ## Using releases (Elixir v1.9+)
 #

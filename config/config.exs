@@ -21,6 +21,11 @@ config :loggregate, LoggregateWeb.Endpoint,
 config :loggregate, Loggregate.ElasticSearch,
   elasticsearch_url: "http://localhost:9200"
 
+config :elastix,
+  shield: true,
+  username: "elastic",
+  password: "9KockPcnwY6dH6ZZKhur"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
