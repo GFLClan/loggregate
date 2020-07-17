@@ -53,6 +53,8 @@ defmodule LoggregateWeb.Router do
       delete "/servers/:id", SettingsController, :delete_server
 
       get "/indices", SettingsController, :indices
+
+      get "/impersonate/:steamid", SettingsController, :impersonate
     end
   end
 

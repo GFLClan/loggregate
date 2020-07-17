@@ -21,7 +21,10 @@ defmodule LoggregateWeb.SettingsController do
   def save_user(conn, %{"id" => id, "user" => target_user}) do
     with user when not is_nil(user) <- Accounts.get_user(id) do
       Permissions.user_has_permission(conn, user, :manage) do
-        case Accounts.update_user(user, target_user) do
+        new_user = Accounts.User.changeset(user, target_user)
+          |> Permissions.sanitize_changeset(conn)
+
+        case Repo.update(new_user) do
           {:ok, _user} ->
             redirect(conn, to: Routes.settings_path(conn, :users))
           {:error, %Ecto.Changeset{} = changeset} ->
@@ -146,5 +149,18 @@ defmodule LoggregateWeb.SettingsController do
   def indices(conn, _params) do
     indices = Permissions.get_managed_indices(conn.assigns[:user])
     render(conn, "indices.html", indices: indices, settings: :indices)
+  end
+
+  def new_index(conn, _params) do
+    Permissions.is_admin?(conn) do
+      render(conn, "new_index.html", settings: :indices)
+    end
+  end
+
+  def impersonate(conn, %{"steamid" => steamid}) do
+    Permissions.is_admin?(conn) do
+      put_session(conn, :steamex_steamid64, steamid)
+      |> redirect(to: Routes.search_path(conn, :index))
+    end
   end
 end

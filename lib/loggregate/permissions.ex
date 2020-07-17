@@ -8,7 +8,7 @@ defmodule Loggregate.Permissions do
 
   defmacro user_has_permission(conn, resource, permission, body) do
     quote location: :keep do
-      import Loggregate.Permissions
+      import Loggregate.Permissions, only: [user_can_manage: 2]
       user = unquote(conn).assigns[:user]
       case unquote(permission) do
         :manage ->
@@ -17,6 +17,15 @@ defmodule Loggregate.Permissions do
           else
             raise Loggregate.PermissionError
           end
+      end
+    end
+  end
+
+  defmacro is_admin?(conn, body) do
+    quote location: :keep do
+      case unquote(conn) do
+        %{assigns: %{user: %User{admin: true}}} -> unquote(body[:do])
+        _ -> raise Loggregate.PermissionError
       end
     end
   end
