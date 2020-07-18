@@ -112,6 +112,8 @@ defmodule Loggregate.ElasticSearch do
     end
 
     {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_index_template/loggregate_template", Poison.encode!(@template))
+    template = @template.template |> Map.put_new(:index_patterns, @template.index_patterns) |> Map.put_new(:settings, @settings)
+    {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_template/loggregate_template", Poison.encode!(template))
   end
 
   def create_index!() do
