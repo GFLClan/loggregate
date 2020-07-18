@@ -12,7 +12,8 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   end
 
   def handle_events(events, _from, state) do
-    GenStage.cast(Loggregate.LogReceiver.LogIngestBroadcaster, {:parsed_entries, Enum.map(events, &(log_msg_passwd(&1)))})
+    parsed_events = Enum.map(events, &(log_msg_passwd(&1))) |> Enum.filter(&(&1 !== :error))
+    GenStage.cast(Loggregate.LogReceiver.LogIngestBroadcaster, {:parsed_entries, parsed_events})
 
     {:noreply, [], state}
   end
@@ -20,26 +21,32 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   def log_msg_passwd({data, {address, port}}) do
     [password, message] = :binary.split(data, "L")
     {server_id, _} = Integer.parse(password)
-    {timestamp, log_data} = parse(message)
-
-    %ParsedLogEntry{
-      server_id: server_id,
-      address: address,
-      port: port,
-      timestamp: timestamp,
-      log_data: log_data
-    }
+    case parse(message) do
+      {timestamp, log_data} ->
+        %ParsedLogEntry{
+          server_id: server_id,
+          address: address,
+          port: port,
+          timestamp: timestamp,
+          log_data: log_data
+        }
+      _ -> :error
+    end
   end
 
   def parse(line) do
     trimmed_line = String.slice(line, 0..-2) |> String.trim()
-    [_, month, day, year, hour, minute, second, message] = Regex.run(~r/^(\d+)\/(\d+)\/(\d+)\s+-\s+(\d+):(\d+):(\d+):\s*(.*)$/, trimmed_line)
-    [month, day, year, hour, minute, second] = Enum.map([month, day, year, hour, minute, second], fn i ->
-      {int, _} = Integer.parse(i)
-      int
-    end)
-    {:ok, timestamp} = NaiveDateTime.from_erl({{year, month, day}, {hour, minute, second}})
-    {timestamp, parse_message(message)}
+    with [_, month, day, year, hour, minute, second, message] <- Regex.run(~r/^(\d+)\/(\d+)\/(\d+)\s+-\s+(\d+):(\d+):(\d+):\s*(.*)$/, trimmed_line),
+      [month, day, year, hour, minute, second] <- Enum.map([month, day, year, hour, minute, second], fn i ->
+        {int, _} = Integer.parse(i)
+        int
+      end),
+      {:ok, timestamp} <- NaiveDateTime.from_erl({{year, month, day}, {hour, minute, second}})
+    do
+      {timestamp, parse_message(message)}
+    else
+      _ -> :error
+    end
   end
 
   alias Loggregate.LogReceiver.Parsers

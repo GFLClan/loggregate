@@ -65,6 +65,7 @@ config :elastix,
 # to start each relevant endpoint:
 #
 config :loggregate, LoggregateWeb.Endpoint, server: true
+config :logger, level: :info
 
 #
 # Then you can assemble a release by calling `mix release`.
