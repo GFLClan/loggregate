@@ -46,7 +46,7 @@ elastic_password =
 
 maxmind_key = System.get_env("MAXMIND_KEY")
 if maxmind_key do
-  config: :locus, :license_key maxmind_key
+  config :locus, :license_key, maxmind_key
 end
 
 config :loggregate, LoggregateWeb.Endpoint,
