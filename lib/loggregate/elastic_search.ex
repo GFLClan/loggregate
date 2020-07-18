@@ -27,8 +27,10 @@ defmodule Loggregate.ElasticSearch do
             type: "text",
             analyzer: "simple"
           },
+          name_kw: %{type: "keyword"},
           address: %{type: "ip"},
-          port: %{type: "long"}
+          port: %{type: "long"},
+          location: %{type: "geo_point"}
         }
       },
       cvar: %{
@@ -46,6 +48,7 @@ defmodule Loggregate.ElasticSearch do
       from_addr: %{
         properties: %{
           address: %{type: "ip"},
+          location: %{type: "geo_point"},
           port: %{type: "long"}
         }
       }
@@ -132,6 +135,10 @@ defmodule Loggregate.ElasticSearch do
     end
 
     {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_index_template/loggregate_#{index}_template", Poison.encode!(template(index)))
+
+    tmp = template(index)
+    tmp = tmp.template |> Map.put_new(:index_patterns, tmp.index_patterns) |> Map.put_new(:settings, settings(index))
+    {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_template/loggregate_template", Poison.encode!(template))
   end
 
   def create_index!(index) do

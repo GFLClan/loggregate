@@ -5,7 +5,7 @@ defmodule Loggregate.LogReceiver.Parsers.Say do
   def parse(message) do
     if Regex.match?(@say_regex, message) do
       [_, name, steamid, chat_message] = Regex.run(@say_regex, message)
-      {:ok, %{line: message, type: :chat, message: chat_message, who: %{steamid: steamid, name: name}}}
+      {:ok, %{line: message, type: :chat, message: chat_message, who: %{steamid: steamid, name: name, name_kw: name}}}
     else
       :no_match
     end

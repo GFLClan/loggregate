@@ -6,6 +6,10 @@ defmodule Loggregate.Application do
   use Application
 
   def start(_type, _args) do
+    if Application.get_env(:locus, :license_key) do
+      :locus.start_loader(:maxmind, {:maxmind, "GeoLite2-City"})
+    end
+
     import Supervisor.Spec
     import Cachex.Spec
 

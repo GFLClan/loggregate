@@ -30,10 +30,34 @@ live_view_salt =
     You can generate one by calling: mix phx.gen.secret
     """
 
+elastic_user =
+  System.get_env("ELASTIC_USER") ||
+    raise """
+    environment variable ELASTIC_USER is missing.
+    You must provide an ElasticSearch user
+    """
+
+elastic_password =
+  System.get_env("ELASTIC_PASSWORD") ||
+    raise """
+    environment variable ELASTIC_PASSWORD is missing.
+    You must provide an ElasticSearch user
+    """
+
+maxmind_key = System.get_env("MAXMIND_KEY")
+if maxmind_key do
+  config :locus, :license_key, maxmind_key
+end
+
 config :loggregate, LoggregateWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
   secret_key_base: secret_key_base,
   live_view: [signing_salt: live_view_salt]
+
+config :elastix,
+  shield: true,
+  username: elastic_user,
+  password: elastic_password
 
 # ## Using releases (Elixir v1.9+)
 #
@@ -41,6 +65,7 @@ config :loggregate, LoggregateWeb.Endpoint,
 # to start each relevant endpoint:
 #
 config :loggregate, LoggregateWeb.Endpoint, server: true
+config :logger, level: :info
 
 #
 # Then you can assemble a release by calling `mix release`.
