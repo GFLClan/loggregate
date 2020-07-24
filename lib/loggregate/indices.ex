@@ -37,7 +37,9 @@ defmodule Loggregate.Indices do
   """
   def get_index!(id), do: Repo.get!(Index, id)
 
-  def get_index(id), do: Repo.get(Index, id)
+  def get_index(id) do
+    Repo.one(from i in Index, where: i.id == ^id, preload: [:managed_users, :servers])
+  end
 
   @doc """
   Creates a index.

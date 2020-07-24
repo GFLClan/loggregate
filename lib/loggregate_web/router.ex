@@ -44,15 +44,16 @@ defmodule LoggregateWeb.Router do
       put "/users/:id", SettingsController, :save_user
       delete "/users/:id", SettingsController, :delete_user
 
-      get "/servers", SettingsController, :servers
-      get "/servers/new", SettingsController, :new_server
-      put "/servers/new", SettingsController, :create_server
-      get "/servers/:id", SettingsController, :server
-      put "/servers/:id", SettingsController, :save_server
-      post "/servers/:id/refresh_token", SettingsController, :refresh_server_token
-      delete "/servers/:id", SettingsController, :delete_server
+      get "/indices", IndicesController, :indices
+      get "/indices/:id/users", IndicesController, :index_users
+      get "/indices/:id/users/new", IndicesController, :new_user
 
-      get "/indices", SettingsController, :indices
+      get "/indices/:id/servers", IndicesController, :index_servers
+      put "/indices/:id/servers", IndicesController, :update_server
+      delete "/indices/:id/servers", IndicesController, :delete_server
+      post "/indices/:id/servers/refresh", IndicesController, :refresh_server_token
+      get "/indices/:id/servers/new", IndicesController, :new_server
+      put "/indices/:id/servers/new", IndicesController, :create_server
 
       get "/impersonate/:steamid", SettingsController, :impersonate
     end

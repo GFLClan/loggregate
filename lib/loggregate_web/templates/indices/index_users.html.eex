@@ -1,0 +1,44 @@
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>SteamID</th>
+            <th>Admin?</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <%= for user <- @index.managed_users do %>
+            <tr>
+                <td><%= user.name %></td>
+                <td><%= user.steamid %></td>
+                <td>
+                    <%= if Permissions.user_can_manage(user, @index) do %>
+                        <span class="icon">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    <% else %>
+                        <span class="icon">
+                            <i class="fas fa-times"></i>
+                        </span>
+                    <% end %>
+                </td>
+                <td>
+                    <a class="icon" href="<%= Routes.indices_path(@conn, :index_users, user: user.id) %>">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+<div class="field is-grouped is-grouped-right">
+  <div class="control">
+    <a href="<%= Routes.indices_path(@conn, :new_user, @index) %>" class="button is-info">
+        <span class="icon is-small">
+            <i class="fas fa-plus"></i>
+        </span>
+        <span>New User</span>
+    </a>
+  </div>
+</div>

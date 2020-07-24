@@ -1,6 +1,6 @@
 defmodule LoggregateWeb.SettingsController do
   use LoggregateWeb, :controller
-  alias Loggregate.{Accounts, ServerMapping, Indices, Permissions, Repo}
+  alias Loggregate.{Accounts, Permissions, Repo}
   require Loggregate.Permissions
 
   def users(conn, _params) do
@@ -59,84 +59,6 @@ defmodule LoggregateWeb.SettingsController do
         case Accounts.delete_user(user) do
           {:ok, _user} ->
             redirect(conn, to: Routes.settings_path(conn, :users))
-          {:error, _err} ->
-            put_status(conn, 500) |> put_view(LoggregateWeb.ErrorView) |> render(:"500")
-        end
-      end
-    else
-      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
-    end
-  end
-
-  def servers(conn, _params) do
-    servers = Permissions.get_managed_servers(conn.assigns[:user])
-    render(conn, "servers.html", servers: servers, settings: :servers)
-  end
-
-  def server(conn, %{"id" => id}) do
-    with server when not is_nil(server) <- ServerMapping.get_server(id) do
-      Permissions.user_has_permission(conn, server, :manage) do
-        render(conn, "server.html", changeset: ServerMapping.ServerMapping.changeset(server, %{}), settings: :servers)
-      end
-    else
-      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
-    end
-  end
-
-  def save_server(conn, %{"id" => id, "server_mapping" => target_server}) do
-    with server when not is_nil(server) <- ServerMapping.get_server(id) do
-      Permissions.user_has_permission(conn, server, :manage) do
-        case ServerMapping.update_server_mapping(server, target_server) do
-          {:ok, _user} ->
-            redirect(conn, to: Routes.settings_path(conn, :servers))
-          {:error, %Ecto.Changeset{} = changeset} ->
-            render(conn, "server.html", changeset: changeset, settings: :servers)
-        end
-      end
-    else
-      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
-    end
-  end
-
-  def refresh_server_token(conn, %{"id" => id}) do
-    with server when not is_nil(server) <- ServerMapping.get_server(id) do
-      Permissions.user_has_permission(conn, server, :manage) do
-        <<new_id::unsigned-24>> = :crypto.strong_rand_bytes(3)
-        {:ok, _} = ServerMapping.update_server_mapping(server, %{server_id: new_id})
-        redirect(conn, to: Routes.settings_path(conn, :server, server))
-      end
-    else
-      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
-    end
-  end
-
-  def new_server(conn, _params) do
-    <<server_id::unsigned-24>> = :crypto.strong_rand_bytes(3)
-    changeset = %ServerMapping.ServerMapping{} |> ServerMapping.ServerMapping.changeset(%{server_id: server_id})
-    render(conn, "new_server.html", changeset: changeset, indices: Permissions.get_managed_indices(conn.assigns[:user]), settings: :servers)
-  end
-
-  def create_server(conn, %{"server_mapping" => server}) do
-    index = Indices.get_index(server["index_id"])
-    Permissions.user_has_permission(conn, index, :manage) do
-      case ServerMapping.create_server_mapping(server) do
-        {:ok, server} ->
-          server = Loggregate.Repo.preload(server, :index)
-          Cachex.put(:ingest_server_cache, server.server_id, server.index)
-
-          redirect(conn, to: Routes.settings_path(conn, :server, server))
-        {:error, %Ecto.Changeset{} = changeset} ->
-          render(conn, "new_server.html", changeset: changeset, settings: :servers)
-      end
-    end
-  end
-
-  def delete_server(conn, %{"id" => id}) do
-    with server when not is_nil(server) <- ServerMapping.get_server(id) do
-      Permissions.user_has_permission(conn, server, :manage) do
-        case ServerMapping.delete_server_mapping(server) do
-          {:ok, _user} ->
-            redirect(conn, to: Routes.settings_path(conn, :servers))
           {:error, _err} ->
             put_status(conn, 500) |> put_view(LoggregateWeb.ErrorView) |> render(:"500")
         end

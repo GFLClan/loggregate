@@ -6,6 +6,7 @@ defmodule Loggregate.ElasticSearch do
         analyzer: "simple"
       },
       server: %{type: "long"},
+      server_name: %{type: "keyword"},
       timestamp: %{type: "date"},
       server_time: %{type: "date"},
       type: %{type: "keyword"},
@@ -137,7 +138,7 @@ defmodule Loggregate.ElasticSearch do
     {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_index_template/loggregate_#{index}_template", Poison.encode!(template(index)))
 
     tmp = template(index)
-    tmp = tmp.template |> Map.put_new(:index_patterns, tmp.index_patterns) |> Map.put_new(:settings, settings(index))
+    template = tmp.template |> Map.put_new(:index_patterns, tmp.index_patterns) |> Map.put_new(:settings, settings(index))
     {:ok, %HTTPoison.Response{status_code: 200} = _resp} = Elastix.HTTP.put("#{get_url()}/_template/loggregate_template", Poison.encode!(template))
   end
 

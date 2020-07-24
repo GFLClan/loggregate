@@ -1,4 +1,4 @@
-<%= form_for @changeset, Routes.settings_path(@conn, :server, @changeset.data.id), fn f -> %>
+<%= form_for @changeset, Routes.indices_path(@conn, :index_servers, @index, server: @changeset.data.id), fn f -> %>
 <div class="field">
   <label class="label">Name</label>
   <div class="control">
@@ -19,13 +19,13 @@
     <button class="button is-info">Submit</button>
   </div>
   <div class="control">
-    <%= link "Refresh ID", to: Routes.settings_path(@conn, :refresh_server_token, @changeset.data.id), method: :post, data: [confirm: "Refresh Server ID?"], class: "button is-primary" %>
+    <%= link "Refresh ID", to: Routes.indices_path(@conn, :refresh_server_token, @index, server: @changeset.data.id), method: :post, data: [confirm: "Refresh Server ID?"], class: "button is-primary" %>
   </div>
   <div class="control">
-    <a href="<%= Routes.settings_path(@conn, :servers) %>" class="button is-secondary">Cancel</a>
+    <a href="<%= Routes.indices_path(@conn, :index_servers, @index) %>" class="button is-secondary">Cancel</a>
   </div>
   <div class="control is-pulled-right">
-    <%= link "Delete", to: Routes.settings_path(@conn, :server, @changeset.data.id), method: :delete, data: [confirm: "Delete server?"], class: "button is-danger" %>
+    <%= link "Delete", to: Routes.indices_path(@conn, :index_servers, @index, server: @changeset.data.id), method: :delete, data: [confirm: "Delete server?"], class: "button is-danger" %>
   </div>
 </div>
 <% end %>

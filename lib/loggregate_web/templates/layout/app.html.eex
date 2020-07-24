@@ -59,30 +59,33 @@
                         <%= if assigns[:settings] do %>
                             <div class="columns">
                                 <div class="column is-one-third">
-                                    <article class="panel is-info">
-                                        <p class="panel-heading">
-                                            <i class="fas fa-cog"></i>
+                                    <aside class="menu">
+                                        <p class="menu-label">
                                             Settings
                                         </p>
-                                        <a class="panel-block <%= if assigns[:settings] == :users do "is-active" end %>" href="<%= Routes.settings_path(@conn, :users) %>">
-                                            <span class="panel-icon">
-                                                <i class="fas fa-user"></i>
-                                            </span>
-                                            Users
-                                        </a>
-                                        <a class="panel-block <%= if assigns[:settings] == :servers do "is-active" end %>" href="<%= Routes.settings_path(@conn, :servers) %>">
-                                            <span class="panel-icon">
-                                                <i class="fas fa-server"></i>
-                                            </span>
-                                            Servers
-                                        </a>
-                                        <a class="panel-block <%= if assigns[:settings] == :indices do "is-active" end %>" href="<%= Routes.settings_path(@conn, :indices) %>">
-                                            <span class="panel-icon">
-                                                <i class="fas fa-database"></i>
-                                            </span>
-                                            Indices
-                                        </a>
-                                    </article>
+                                        <ul class="menu-list">
+                                            <li>
+                                                <a class="<%= if assigns[:settings] == :users do "is-active" end %>" href="<%= Routes.settings_path(@conn, :users) %>">
+                                                    Users
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="<%= if assigns[:settings] == :indices do "is-active" end %>" href="<%= Routes.indices_path(@conn, :indices) %>">
+                                                    Indices
+                                                </a>
+                                                <%= if assigns[:index] != nil do %>
+                                                    <ul>
+                                                        <a class="<%= if assigns[:index_settings] == :users do "is-active" end %>" href="<%= Routes.indices_path(@conn, :index_users, @index) %>">
+                                                            Users
+                                                        </a>
+                                                        <a class="<%= if assigns[:index_settings] == :servers do "is-active" end %>" href="<%= Routes.indices_path(@conn, :index_servers, @index) %>">
+                                                            Servers
+                                                        </a>
+                                                    </ul>
+                                                <% end %>
+                                            </li>
+                                        </ul>
+                                    </aside>
                                 </div>
                                 <div class="column is-two-thirds">
                                     <div class="card is-shadowless">

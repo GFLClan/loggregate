@@ -3,18 +3,16 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Index</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        <%= for server <- @servers do %>
+        <%= for index <- @indices do %>
             <tr>
-                <td><%= server.server_id %></td>
-                <td><%= server.server_name %></td>
-                <td><%= server.index.name %>
+                <td><%= index.id %></td>
+                <td><%= index.name %></td>
                 <td>
-                    <a class="icon" href="<%= Routes.settings_path(@conn, :server, server.id) %>">
+                    <a class="icon" href="<%= Routes.indices_path(@conn, :index_users, index.id) %>">
                         <i class="fas fa-cog"></i>
                     </a>
                 </td>
@@ -24,11 +22,11 @@
 </table>
 <div class="field is-grouped is-grouped-right">
   <div class="control">
-    <a href="<%= Routes.settings_path(@conn, :new_server) %>" class="button is-info">
+    <a href="<%= Routes.indices_path(@conn, :indices) %>" class="button is-info">
         <span class="icon is-small">
             <i class="fas fa-plus"></i>
         </span>
-        <span>New Server</span>
+        <span>New Index</span>
     </a>
   </div>
 </div>

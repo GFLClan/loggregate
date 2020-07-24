@@ -29,6 +29,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
           {timestamp, log_data} ->
             %ParsedLogEntry{
               server_id: server_id,
+              server_name: server.server_name,
               address: address,
               port: port,
               timestamp: timestamp,
