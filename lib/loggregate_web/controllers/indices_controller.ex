@@ -1,12 +1,28 @@
 defmodule LoggregateWeb.IndicesController do
   use LoggregateWeb, :controller
   alias Loggregate.{Repo, Indices, Permissions, ServerMapping}
-  alias ServerMapping.ServerMapping, as: Server
+  alias Loggregate.ServerMapping.ServerMapping, as: Server
+  alias Loggregate.Accounts.User
   require Loggregate.Permissions
 
   def indices(conn, _params) do
     indices = Permissions.get_managed_indices(conn.assigns[:user])
     render(conn, "indices.html", indices: indices, settings: :indices)
+  end
+
+  def index_users(conn, %{"id" => index_id, "user" => user_id}) do
+    case Indices.get_index(index_id) do
+      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
+      index ->
+        Permissions.user_has_permission(conn, index, :manage) do
+          case Enum.filter(index.managed_users, &(to_string(&1.id) == user_id)) do
+            [user] ->
+              changeset = User.changeset(user, %{})
+              render(conn, "user.html", index: index, target_user: user, changeset: changeset, settings: :index_settings, index_settings: :users)
+            _ -> render(conn, "index_users.html", index: index, settings: :index_settings, index_settings: :users)
+          end
+        end
+    end
   end
 
   def index_users(conn, %{"id" => index_id}) do
@@ -15,6 +31,35 @@ defmodule LoggregateWeb.IndicesController do
       index ->
         Permissions.user_has_permission(conn, index, :manage) do
           render(conn, "index_users.html", index: index, settings: :index_settings, index_settings: :users)
+        end
+    end
+  end
+
+  def new_user(conn, %{"id" => index_id}) do
+    case Indices.get_index(index_id) do
+      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
+      index ->
+        Permissions.user_has_permission(conn, index, :manage) do
+          changeset = User.changeset(%User{}, %{})
+          render(conn, "new_user.html", index: index, changeset: changeset, settings: :index_settings, index_settings: :users)
+        end
+    end
+  end
+
+  def create_user(conn, %{"id" => index_id, "user" => new_user}) do
+    case Indices.get_index(index_id) do
+      nil -> put_status(conn, 404) |> put_view(LoggregateWeb.ErrorView) |> render(:"404")
+      index ->
+        case Loggregate.Accounts.create_user(new_user |> Map.put_new("admin", false)) do
+          {:ok, user} ->
+            {:ok, _} = Loggregate.Accounts.create_acl_entry(%{target_user_id: user.steamid, index_id: index.id, user_access: "manage"})
+            if new_user["index_admin"] == "true" do
+              {:ok, _} = Loggregate.Accounts.create_acl_entry(%{user_id: user.steamid, index_id: index.id, index_access: "manage"})
+            end
+            redirect(conn, to: Routes.indices_path(conn, :index_users, index, user: user.id))
+          {:error, %Ecto.Changeset{} = changeset} ->
+            IO.inspect(changeset)
+            render(conn, "new_user.html", index: index, changeset: changeset, settings: :index_settings, index_settings: :users)
         end
     end
   end
@@ -28,7 +73,7 @@ defmodule LoggregateWeb.IndicesController do
             [server] ->
               changeset = Server.changeset(server, %{})
               render(conn, "server.html", index: index, changeset: changeset, settings: :index_settings, index_settings: :servers)
-            _ -> render(conn, "index_users.html", index: index, settings: :index_settings, index_settings: :users)
+            _ -> render(conn, "index_servers.html", index: index, settings: :index_settings, index_settings: :users)
           end
         end
     end

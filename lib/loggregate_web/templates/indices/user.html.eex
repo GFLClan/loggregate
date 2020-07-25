@@ -1,0 +1,42 @@
+<%= form_for @changeset, Routes.settings_path(@conn, :user, @changeset.data.id), fn f -> %>
+<div class="field">
+  <label class="label">Name</label>
+  <div class="control">
+    <%= text_input f, :name, class: "input" %>
+  </div>
+</div>
+<div class="field">
+  <label class="label">SteamID</label>
+  <div class="control has-icons-left">
+    <%= text_input f, :steamid, class: "input" %>
+    <span class="icon is-small is-left">
+      <i class="fas fa-user"></i>
+    </span>
+  </div>
+  <p class="help i">https://steamcommunity.com/id/&lt;XXXXXXXXXXXXXX&gt;</p>
+</div>
+<div>
+  <h4>User Servers</h4>
+  <%= for server <- @index.servers do %>
+    <div class="field">
+        <div class="control">
+            <label class="checkbox">
+            <%= checkbox f, :"server_#{server.id}", value: Permissions.user_can_search(@target_user, server) %>
+            <strong><%= server.server_name %></strong>
+            </label>
+        </div>
+    </div>
+  <% end %>
+</div>
+<div class="field is-grouped">
+  <div class="control">
+    <button class="button is-info">Submit</button>
+  </div>
+  <div class="control">
+    <a href="<%= Routes.indices_path(@conn, :index_users, @index) %>" class="button is-secondary">Cancel</a>
+  </div>
+  <div class="control is-pulled-right">
+    <%= link "Delete", to: Routes.settings_path(@conn, :user, @changeset.data.id), method: :delete, data: [confirm: "Delete user?"], class: "button is-danger" %>
+  </div>
+</div>
+<% end %>

@@ -3,7 +3,7 @@
         <tr>
             <th>Name</th>
             <th>SteamID</th>
-            <th>Admin?</th>
+            <th>Index Admin?</th>
             <th></th>
         </tr>
     </thead>
@@ -24,7 +24,7 @@
                     <% end %>
                 </td>
                 <td>
-                    <a class="icon" href="<%= Routes.indices_path(@conn, :index_users, user: user.id) %>">
+                    <a class="icon" href="<%= Routes.indices_path(@conn, :index_users, @index, user: user.id) %>">
                         <i class="fas fa-cog"></i>
                     </a>
                 </td>

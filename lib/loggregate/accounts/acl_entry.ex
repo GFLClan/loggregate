@@ -17,7 +17,7 @@ defmodule Loggregate.Accounts.ACLEntry do
   @doc false
   def changeset(acl_entry, attrs) do
     acl_entry
-    |> cast(attrs, [:server_access, :index_access, :server_id, :index_id, :user_id])
+    |> cast(attrs, [:server_access, :index_access, :server_id, :index_id, :user_id, :target_user_id, :user_access])
     |> validate_required([])
   end
 end

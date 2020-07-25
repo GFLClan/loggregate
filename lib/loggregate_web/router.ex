@@ -47,6 +47,7 @@ defmodule LoggregateWeb.Router do
       get "/indices", IndicesController, :indices
       get "/indices/:id/users", IndicesController, :index_users
       get "/indices/:id/users/new", IndicesController, :new_user
+      put "/indices/:id/users/new", IndicesController, :create_user
 
       get "/indices/:id/servers", IndicesController, :index_servers
       put "/indices/:id/servers", IndicesController, :update_server

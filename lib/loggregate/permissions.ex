@@ -30,6 +30,7 @@ defmodule Loggregate.Permissions do
     end
   end
 
+  @spec user_can_search(User.t(), User.t() | ServerMapping.t() | Index.t()) :: boolean
   def user_can_search(%User{admin: true} = _user, _), do: true
 
   def user_can_search(%User{} = user, %ServerMapping{} = server) do
@@ -46,6 +47,7 @@ defmodule Loggregate.Permissions do
 
   def user_can_search(_, _), do: false
 
+  @spec user_can_manage(User.t(), User.t() | ServerMapping.t() | Index.t()) :: boolean
   def user_can_manage(%User{admin: true} = _user, _), do: true
 
   def user_can_manage(%User{} = user, %Index{} = index) do
@@ -58,14 +60,17 @@ defmodule Loggregate.Permissions do
 
   def user_can_manage(_, _), do: false
 
+  @spec get_search_indices(User.t()) :: [Index.t()]
   def get_search_indices(%User{} = user) do
     Indices.list_indices() |> Enum.filter(&(user_can_search(user, &1)))
   end
 
+  @spec get_search_servers(User.t()) :: [ServerMapping.t()]
   def get_search_servers(%User{} = user) do
     Servers.list_servers() |> Enum.filter(&(user_can_search(user, &1)))
   end
 
+  @spec get_managed_users(User.t()) :: [User.t()]
   def get_managed_users(%User{admin: true} = _user) do
     Accounts.list_users()
   end
@@ -77,6 +82,7 @@ defmodule Loggregate.Permissions do
     direct_users ++ index_users
   end
 
+  @spec get_managed_servers(User.t()) :: [ServerMapping.t()]
   def get_managed_servers(%User{admin: true} = _user) do
     Servers.list_servers()
   end
@@ -88,6 +94,7 @@ defmodule Loggregate.Permissions do
     direct_servers ++ index_servers
   end
 
+  @spec get_managed_indices(User.t()) :: [Index.t()]
   def get_managed_indices(%User{admin: true} = _user) do
     Indices.list_indices()
   end
@@ -96,6 +103,7 @@ defmodule Loggregate.Permissions do
     Enum.filter(user.acl, &(&1.index_access == "manage")) |> Enum.map(&(&1.index))
   end
 
+  @spec get_es_permissions_filter(User.t()) :: [%{bool: map}]
   def get_es_permissions_filter(%User{admin: true} = _user), do: []
 
   def get_es_permissions_filter(%User{} = user) do
@@ -103,6 +111,7 @@ defmodule Loggregate.Permissions do
     [%{bool: %{should: Enum.map(servers, &(%{term: %{server: &1.server_id}}))}}]
   end
 
+  @spec get_permissions_predicate(User.t()) :: (ParsedLogEntry.t() -> boolean)
   def get_permissions_predicate(%User{} = user) do
     fn %ParsedLogEntry{} = entry ->
       cond do
@@ -114,6 +123,7 @@ defmodule Loggregate.Permissions do
     end
   end
 
+  @spec has_settings?(User.t()) :: boolean
   def has_settings?(%User{admin: true} = _user), do: true
 
   def has_settings?(%User{} = user) do
@@ -122,6 +132,7 @@ defmodule Loggregate.Permissions do
 
   def has_settings?(_user), do: false
 
+  @spec sanitize_changeset(any(), Plug.Conn.t()) :: Ecto.Changeset.t()
   def sanitize_changeset(%Ecto.Changeset{} = changeset, %{assigns: %{user: %{admin: true} = _user}} = _conn), do: changeset
 
   def sanitize_changeset(%Ecto.Changeset{} = changeset, %{assigns: %{user: _user}} = _conn) do

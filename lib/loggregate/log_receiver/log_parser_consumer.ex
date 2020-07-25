@@ -2,7 +2,6 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   use GenStage
 
   alias Loggregate.LogReceiver.ParsedLogEntry
-  alias Loggregate.ServerMapping
 
   def start_link() do
     GenStage.start_link(__MODULE__, :ok)
