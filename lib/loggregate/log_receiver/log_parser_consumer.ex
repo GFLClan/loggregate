@@ -61,6 +61,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     Parsers.Rcon,
     Parsers.Connected,
     Parsers.Say,
+    Parsers.MapLoad,
     Parsers.Raw
   ]
 
