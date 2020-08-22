@@ -56,7 +56,8 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     Parsers.Connected,
     Parsers.Say,
     Parsers.MapLoad,
-    Parsers.Raw
+    Parsers.PluginVPN,
+    Parsers.Raw,
   ]
 
 
