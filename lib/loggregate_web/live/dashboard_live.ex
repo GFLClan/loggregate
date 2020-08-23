@@ -9,7 +9,10 @@ defmodule LoggregateWeb.DashboardLive do
       case get_connect_params(socket) do
         %{"hash" => <<"#", hash::binary>>} ->
           query = URI.decode(to_string(hash))
-          predicate = LogSearch.build_search_predicate(query)
+          predicate = case LogSearch.build_search_predicate(query) do
+            {:ok, predicate} -> predicate
+            _ -> fn _ -> true end
+          end
 
           assign(socket, consumer: consumer, subscription_tag: tag, filter: query, predicate: predicate)
         params ->
@@ -40,7 +43,10 @@ defmodule LoggregateWeb.DashboardLive do
   end
 
   def handle_event("update_filter", %{"query" => query}, socket) do
-    predicate = LogSearch.build_search_predicate(query)
+    predicate = case LogSearch.build_search_predicate(query) do
+      {:ok, predicate} -> predicate
+      _ -> fn _ -> true end
+    end
 
     {:noreply, assign(socket, filter: query, predicate: predicate)}
   end

@@ -1,11 +1,17 @@
 = form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f ->
   .field.has-addons
     p.control.is-expanded.has-icons-left
-      input.input.is-medium type="text" placeholder="Search" name="query" value=@query
+      = if assigns[:search_error] do
+        input.input.is-medium.is-danger type="text" placeholder="Search" name="query" value=@query
+      - else
+        input.input.is-medium type="text" placeholder="Search" name="query" value=@query
       span.icon.is-left
         i.fa.fa-search
     p.control
       button.button.is-info.is-medium Search
+  = if assigns[:search_error] do
+    p.help.is-danger.is-size-5 Invalid query.
+    a href="https://github.com/GFLClan/loggregate/wiki/Searching" Search help
   .field.is-horizontal
     .field-label.is-normal
       label.label Time span
