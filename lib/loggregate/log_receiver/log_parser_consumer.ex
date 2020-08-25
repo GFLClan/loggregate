@@ -32,7 +32,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
               address: address,
               port: port,
               timestamp: timestamp,
-              log_data: log_data,
+              log_data: transform_log_data(log_data),
               index: server.index.name
             }
           _ -> :error
@@ -55,29 +55,50 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     end
   end
 
-  alias Loggregate.LogReceiver.Parsers
-  @parsers [
-    Parsers.Cvar,
-    Parsers.Rcon,
-    Parsers.Connected,
-    Parsers.Say,
-    Parsers.MapLoad,
-    Parsers.Raw
-  ]
-
-
-
   def parse_message(message) do
-    Enum.reduce(@parsers, :no_match, fn parser, acc ->
+    parsed = Enum.reduce(Loggregate.Grok.fetch_patterns(), :no_match, fn predicate, acc ->
         case acc do
-          :no_match ->
-            case parser.parse(message) do
-              :skip -> :skip
-              :no_match -> :no_match
-              {:ok, parsed} -> parsed
-            end
+          :no_match -> predicate.(message)
           _ -> acc
         end
     end)
+    case parsed do
+      :no_match -> %{type: :raw, line: message}
+      named_matches ->
+        entries = Map.put(named_matches, "line", message)
+          |> Map.to_list()
+          |> Enum.map(fn {key, value} ->
+            {Map.get(Loggregate.Grok.fetch_aliases(), key, key), value}
+          end)
+
+        Map.new(entries)
+    end
+  end
+
+  def lookup_location(address) do
+    case :locus.lookup(:maxmind, address) do
+      {:ok, %{"location" => %{"latitude" => lat, "longitude" => lon}}} -> %{"lat" => lat, "lon" => lon}
+      err -> nil
+    end
+  end
+
+  # TODO: Cleaner way to handle this
+  def transform_log_data(log_data) do
+    log_data = case Map.get(log_data, "who.address") do
+      nil -> log_data
+      address ->
+        case lookup_location(address) do
+          {:ok, loc} -> Map.put(log_data, "who.location", loc)
+          _ -> log_data
+        end
+    end
+    case Map.get(log_data, "from_addr.address") do
+      nil -> log_data
+      address ->
+        case lookup_location(address) do
+          {:ok, loc} -> Map.put(log_data, "from_addr.location", loc)
+          _ -> log_data
+        end
+    end
   end
 end

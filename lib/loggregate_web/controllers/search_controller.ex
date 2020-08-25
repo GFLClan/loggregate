@@ -8,17 +8,25 @@ defmodule LoggregateWeb.SearchController do
     {start_date, end_date} = parse_date_range(date_range)
     {from, _} = Integer.parse(from)
     indices = Permissions.get_search_indices(conn.assigns[:user]) |> Enum.map(&(&1.name))
-
-    results = ElasticSearch.get_log_entries(indices, LogSearch.build_es_query(query, {start_date, end_date}, conn.assigns[:user]), from)
-    render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: query, next_page: from + 50)
+    case LogSearch.build_es_query(query, {start_date, end_date}, conn.assigns[:user]) do
+      {:ok, es_query} ->
+        results = ElasticSearch.get_log_entries(indices, es_query, from)
+        render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: query, next_page: from + 50)
+      _ ->
+        render(conn, "index.html", results: [], start_date: start_date, end_date: end_date, query: query, next_page: from + 50, search_error: true)
+    end
   end
 
   def index(conn, %{"query" => query, "date_range" => date_range} = _params) do
     {start_date, end_date} = parse_date_range(date_range)
     indices = Permissions.get_search_indices(conn.assigns[:user]) |> Enum.map(&(&1.name))
-
-    results = ElasticSearch.get_log_entries(indices, LogSearch.build_es_query(query, {start_date, end_date}, conn.assigns[:user]), 0)
-    render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: query, next_page: 50)
+    case LogSearch.build_es_query(query, {start_date, end_date}) do
+      {:ok, es_query} ->
+        results = ElasticSearch.get_log_entries(es_query)
+        render(conn, "index.html", results: populate_server_name(results), start_date: start_date, end_date: end_date, query: query, next_page: 50)
+      _ ->
+        render(conn, "index.html", results: [], start_date: start_date, end_date: end_date, query: query, next_page: 50, search_error: true)
+    end
   end
 
   def index(conn, _params) do

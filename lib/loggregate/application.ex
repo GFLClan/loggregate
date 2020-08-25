@@ -30,7 +30,8 @@ defmodule Loggregate.Application do
       %{
         id: Loggregate.LogReceiver.ServerCache,
         start: {Cachex, :start_link, [:ingest_server_cache, [warmers: [warmer(module: Loggregate.ServerCacheWarmer, state: nil)]]]}
-      }
+      },
+      Loggregate.Grok.ConfigCache
     ]
 
     children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogDatabaseConsumer, [], id: "db-worker-#{i}")
