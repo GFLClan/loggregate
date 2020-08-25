@@ -27,7 +27,8 @@ defmodule Loggregate.Application do
       {Loggregate.LogReceiver.LogIngestProducer, []},
       {Loggregate.LogReceiver.LogIngestBroadcaster, []},
       {Loggregate.LogReceiver.LogDatabaseProducer, []},
-      {Phoenix.PubSub, [name: Loggregate.PubSub, adapter: Phoenix.PubSub.PG2]}
+      {Phoenix.PubSub, [name: Loggregate.PubSub, adapter: Phoenix.PubSub.PG2]},
+      Loggregate.Grok.ConfigCache
     ]
 
     children = children ++ for i <- 1..System.schedulers_online, do: worker(Loggregate.LogReceiver.LogDatabaseConsumer, [], id: "db-worker-#{i}")
