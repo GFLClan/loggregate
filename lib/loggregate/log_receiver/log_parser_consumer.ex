@@ -28,7 +28,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
           address: address,
           port: port,
           timestamp: timestamp,
-          log_data: log_data
+          log_data: transform_log_data(log_data)
         }
       _ -> :error
     end
@@ -66,6 +66,33 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
           end)
 
         Map.new(entries)
+    end
+  end
+
+  def lookup_location(address) do
+    case :locus.lookup(:maxmind, address) do
+      {:ok, %{"location" => %{"latitude" => lat, "longitude" => lon}}} -> %{lat: lat, lon: lon}
+      err -> nil
+    end
+  end
+
+  # TODO: Cleaner way to handle this
+  def transform_log_data(log_data) do
+    log_data = case Map.get(log_data, "who.address") do
+      nil -> log_data
+      address ->
+        case lookup_location(address) do
+          {:ok, loc} -> Map.put(log_data, "who.location", loc)
+          _ -> Map.put(log_data, "who.location", :none)
+        end
+    end
+    case Map.get(log_data, "from_addr.address") do
+      nil -> log_data
+      address ->
+        case lookup_location(address) do
+          {:ok, loc} -> Map.put(log_data, "from_addr.location", loc)
+          _ -> Map.put(log_data, "from_addr.location", :none)
+        end
     end
   end
 end
