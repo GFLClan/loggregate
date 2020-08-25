@@ -59,7 +59,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
     case parsed do
       :no_match -> %{type: :raw, line: message}
       named_matches ->
-        entries = Map.put(named_matches, :line, message)
+        entries = Map.put(named_matches, "line", message)
           |> Map.to_list()
           |> Enum.map(fn {key, value} ->
             {Map.get(Loggregate.Grok.fetch_aliases(), key, key), value}
@@ -71,7 +71,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
 
   def lookup_location(address) do
     case :locus.lookup(:maxmind, address) do
-      {:ok, %{"location" => %{"latitude" => lat, "longitude" => lon}}} -> %{lat: lat, lon: lon}
+      {:ok, %{"location" => %{"latitude" => lat, "longitude" => lon}}} -> %{"lat" => lat, "lon" => lon}
       err -> nil
     end
   end
@@ -83,7 +83,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
       address ->
         case lookup_location(address) do
           {:ok, loc} -> Map.put(log_data, "who.location", loc)
-          _ -> Map.put(log_data, "who.location", :none)
+          _ -> log_data
         end
     end
     case Map.get(log_data, "from_addr.address") do
@@ -91,7 +91,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
       address ->
         case lookup_location(address) do
           {:ok, loc} -> Map.put(log_data, "from_addr.location", loc)
-          _ -> Map.put(log_data, "from_addr.location", :none)
+          _ -> log_data
         end
     end
   end
