@@ -1,0 +1,22 @@
+<%= form_for @changeset, Routes.settings_path(@conn, :new_grok_pattern), fn f -> %>
+  <div class="field">
+    <label class="label">Name</label>
+    <div class="control">
+      <%= text_input f, :name, class: "input" %>
+    </div>
+  </div>
+  <div class="field has-addon">
+    <label class="label">Pattern</label>
+    <div class="control has-icons-left">
+      <%= textarea f, :pattern, class: "textarea" %>
+    </div>
+  </div>
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-info">Submit</button>
+    </div>
+    <div class="control">
+      <a href="<%= Routes.settings_path(@conn, :grok_patterns) %>" class="button is-secondary">Cancel</a>
+    </div>
+  </div>
+<% end %>

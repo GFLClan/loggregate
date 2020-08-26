@@ -1,6 +1,6 @@
 defmodule LoggregateWeb.SettingsController do
   use LoggregateWeb, :controller
-  alias Loggregate.{Accounts, Permissions, Repo}
+  alias Loggregate.{Accounts, Permissions, Repo, Grok}
   require Loggregate.Permissions
 
   def users(conn, _params) do
@@ -83,6 +83,120 @@ defmodule LoggregateWeb.SettingsController do
     Permissions.is_admin?(conn) do
       put_session(conn, :steamex_steamid64, steamid)
       |> redirect(to: Routes.search_path(conn, :index))
+    end
+  end
+
+  def grok_patterns(conn, _params) do
+    Permissions.is_admin?(conn) do
+      render(conn, "grok_patterns.html", patterns: Grok.list_grok_patterns(), settings: :grok, grok: :patterns)
+    end
+  end
+
+  def edit_grok_pattern(conn, %{"id" => id}) do
+    Permissions.is_admin?(conn) do
+      pattern = Grok.get_pattern!(id)
+      render(conn, "grok_pattern.html", changeset: Grok.Pattern.changeset(pattern, %{}), settings: :grok, grok: :patterns)
+    end
+  end
+
+  def save_grok_pattern(conn, %{"id" => id, "pattern" => changeset}) do
+    Permissions.is_admin?(conn) do
+      pattern = Grok.get_pattern!(id)
+      case Grok.update_pattern(pattern, changeset) do
+        {:ok, _} ->
+          Grok.reload_config_cache()
+          redirect(conn, to: Routes.settings_path(conn, :grok_patterns))
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "grok_pattern.html", changeset: changeset, settings: :grok, grok: :patterns)
+      end
+    end
+  end
+
+  def new_grok_pattern(conn, %{"pattern" => changeset}) do
+    Permissions.is_admin?(conn) do
+      case Grok.create_pattern(changeset) do
+        {:ok, pattern} ->
+          Grok.reload_config_cache()
+          redirect(conn, to: Routes.settings_path(conn, :edit_grok_pattern, pattern))
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "new_grok_pattern.html", changeset: changeset, settings: :grok, grok: :patterns)
+      end
+    end
+  end
+
+  def new_grok_pattern(conn, _) do
+    Permissions.is_admin?(conn) do
+      changeset = %Grok.Pattern{} |> Grok.Pattern.changeset(%{})
+      render(conn, "new_grok_pattern.html", changeset: changeset, settings: :grok, grok: :patterns)
+    end
+  end
+
+  def delete_grok_pattern(conn, %{"id" => id}) do
+    Permissions.is_admin?(conn) do
+      pattern = Grok.get_pattern!(id)
+      case Grok.delete_pattern(pattern) do
+        {:ok, _} ->
+          redirect(conn, to: Routes.settings_path(conn, :grok_patterns))
+        {:error, _} ->
+          put_status(conn, 500) |> put_view(LoggregateWeb.ErrorView) |> render(:"500")
+      end
+    end
+  end
+
+  def grok_parsers(conn, _params) do
+    Permissions.is_admin?(conn) do
+      render(conn, "grok_parsers.html", msg_patterns: Grok.list_grok_msg_patterns(), settings: :grok, grok: :parsers)
+    end
+  end
+
+  def edit_grok_parser(conn, %{"id" => id}) do
+    Permissions.is_admin?(conn) do
+      pattern = Grok.get_message_pattern!(id)
+      render(conn, "grok_parser.html", changeset: Grok.MessagePattern.changeset(pattern, %{}), settings: :grok, grok: :parsers)
+    end
+  end
+
+  def save_grok_parser(conn, %{"id" => id, "message_pattern" => changeset}) do
+    Permissions.is_admin?(conn) do
+      pattern = Grok.get_message_pattern!(id)
+      case Grok.update_message_pattern(pattern, changeset) do
+        {:ok, _} ->
+          Grok.reload_config_cache()
+          redirect(conn, to: Routes.settings_path(conn, :grok_parsers))
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "grok_parser.html", changeset: changeset, settings: :grok, grok: :parsers)
+      end
+    end
+  end
+
+  def new_grok_parser(conn, %{"message_pattern" => changeset}) do
+    Permissions.is_admin?(conn) do
+      case Grok.create_message_pattern(changeset) do
+        {:ok, pattern} ->
+          Grok.reload_config_cache()
+          redirect(conn, to: Routes.settings_path(conn, :edit_grok_parser, pattern))
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "new_grok_parser.html", changeset: changeset, settings: :grok, grok: :parsers)
+      end
+    end
+  end
+
+  def new_grok_parser(conn, _) do
+    Permissions.is_admin?(conn) do
+      changeset = %Grok.MessagePattern{} |> Grok.MessagePattern.changeset(%{})
+      render(conn, "new_grok_parser.html", changeset: changeset, settings: :grok, grok: :parsers)
+    end
+  end
+
+  def delete_grok_parser(conn, %{"id" => id}) do
+    Permissions.is_admin?(conn) do
+      pattern = Grok.get_message_pattern!(id)
+      case Grok.delete_message_pattern(pattern) do
+        {:ok, _} ->
+          redirect(conn, to: Routes.settings_path(conn, :grok_parsers))
+        {:error, _} ->
+          put_status(conn, 500) |> put_view(LoggregateWeb.ErrorView) |> render(:"500")
+      end
     end
   end
 end

@@ -16,3 +16,8 @@ div.code {
 div.code > code {
     color: #4a4a4a;
 }
+
+.textarea {
+    white-space: nowrap;
+    overflow-x: scroll;
+}

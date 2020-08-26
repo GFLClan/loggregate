@@ -84,6 +84,21 @@
                                                     </ul>
                                                 <% end %>
                                             </li>
+                                            <p class="menu-label">
+                                                Grok
+                                            </p>
+                                            <ul>
+                                                <li>
+                                                    <a class="<%= if assigns[:grok] == :patterns do "is-active" end %>" href="<%= Routes.settings_path(@conn, :grok_patterns) %>">
+                                                        Patterns
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="<%= if assigns[:grok] == :parsers do "is-active" end %>" href="<%= Routes.settings_path(@conn, :grok_parsers) %>">
+                                                        Parsers
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </ul>
                                     </aside>
                                 </div>

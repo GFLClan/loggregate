@@ -57,6 +57,19 @@ defmodule LoggregateWeb.Router do
       put "/indices/:id/servers/new", IndicesController, :create_server
 
       get "/impersonate/:steamid", SettingsController, :impersonate
+
+      get "/grok/patterns", SettingsController, :grok_patterns
+      get "/grok/patterns/new", SettingsController, :new_grok_pattern
+      post "/grok/patterns/new", SettingsController, :new_grok_pattern
+      get "/grok/patterns/:id", SettingsController, :edit_grok_pattern
+      put "/grok/patterns/:id", SettingsController, :save_grok_pattern
+      delete "/grok/patterns/:id", SettingsController, :delete_grok_pattern
+      get "/grok/parsers", SettingsController, :grok_parsers
+      get "/grok/parsers/new", SettingsController, :new_grok_parser
+      post "/grok/parsers/new", SettingsController, :new_grok_parser
+      get "/grok/parsers/:id", SettingsController, :edit_grok_parser
+      put "/grok/parsers/:id", SettingsController, :save_grok_parser
+      delete "/grok/parsers/:id", SettingsController, :delete_grok_parser
     end
   end
 
