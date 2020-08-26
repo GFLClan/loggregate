@@ -2,6 +2,7 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   use GenStage
 
   alias Loggregate.LogReceiver.ParsedLogEntry
+  require Logger
 
   def start_link() do
     GenStage.start_link(__MODULE__, :ok)
@@ -72,7 +73,9 @@ defmodule Loggregate.LogReceiver.LogParserConsumer do
   def lookup_location(address) do
     case :locus.lookup(:maxmind, address) do
       {:ok, %{"location" => %{"latitude" => lat, "longitude" => lon}}} -> %{"lat" => lat, "lon" => lon}
-      err -> nil
+      err ->
+        Logger.warn("Error getting IP location #{inspect(err)}")
+        nil
     end
   end
 

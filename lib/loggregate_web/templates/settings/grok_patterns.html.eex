@@ -1,0 +1,35 @@
+<div class="content">
+    <h3>Patterns</h3>
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Pattern</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <%= for pattern <- @patterns do %>
+                <tr>
+                    <td><code><%= pattern.name %></code></td>
+                    <td><code><%= pattern.pattern %></code></td>
+                    <td>
+                        <a class="icon" href="<%= Routes.settings_path(@conn, :edit_grok_pattern, pattern) %>">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    </td>
+                </tr>
+            <% end %>
+        </tbody>
+    </table>
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <a href="<%= Routes.settings_path(@conn, :new_grok_pattern) %>" class="button is-info">
+                <span class="icon is-small">
+                    <i class="fas fa-plus"></i>
+                </span>
+                <span>New Pattern</span>
+            </a>
+        </div>
+    </div>
+</div>

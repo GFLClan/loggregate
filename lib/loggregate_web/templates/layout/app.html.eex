@@ -57,24 +57,38 @@
                         <%= if assigns[:settings] do %>
                             <div class="columns">
                                 <div class="column is-one-third">
-                                    <article class="panel is-info">
-                                        <p class="panel-heading">
-                                            <i class="fas fa-cog"></i>
-                                            Settings
-                                        </p>
-                                        <a class="panel-block <%= if assigns[:settings] == :users do "is-active" end %>" href="<%= Routes.settings_path(@conn, :users) %>">
-                                            <span class="panel-icon">
-                                                <i class="fas fa-user"></i>
-                                            </span>
-                                            Users
-                                        </a>
-                                        <a class="panel-block <%= if assigns[:settings] == :servers do "is-active" end %>" href="<%= Routes.settings_path(@conn, :servers) %>">
-                                            <span class="panel-icon">
-                                                <i class="fas fa-server"></i>
-                                            </span>
-                                            Servers
-                                        </a>
-                                    </article>
+                                    <aside class="menu">
+                                        <ul class="menu-list">
+                                            <p class="menu-label">
+                                                Settings
+                                            </p>
+                                            <li>
+                                                <a class="<%= if assigns[:settings] == :users do "is-active" end %>" href="<%= Routes.settings_path(@conn, :users) %>">
+                                                    Users
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="<%= if assigns[:settings] == :servers do "is-active" end %>" href="<%= Routes.settings_path(@conn, :servers) %>">
+                                                    Servers
+                                                </a>
+                                            </li>
+                                            <p class="menu-label">
+                                                Grok
+                                            </p>
+                                            <ul>
+                                                <li>
+                                                    <a class="<%= if assigns[:grok] == :patterns do "is-active" end %>" href="<%= Routes.settings_path(@conn, :grok_patterns) %>">
+                                                        Patterns
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="<%= if assigns[:grok] == :parsers do "is-active" end %>" href="<%= Routes.settings_path(@conn, :grok_parsers) %>">
+                                                        Parsers
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </ul>
+                                    </aside>
                                 </div>
                                 <div class="column is-two-thirds">
                                     <div class="card is-shadowless">

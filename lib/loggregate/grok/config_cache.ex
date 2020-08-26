@@ -6,7 +6,7 @@ defmodule Loggregate.Grok.ConfigCache do
   end
 
   def init(_opts) do
-    :ets.new(:loggregate_grok_config, [:named_table])
+    :ets.new(:loggregate_grok_config, [:public, :named_table])
     Loggregate.Grok.reload_config_cache()
 
     {:ok, nil}
