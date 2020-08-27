@@ -26,7 +26,7 @@ defmodule Loggregate.LogSearch.ESCompileMacros do
     quote do
       alias Loggregate.LogSearch.ESCompileMacros
       ESCompileMacros.def_leaf_operator(DreaeQL.Operators.Equals, &(%{must: %{match: Map.put(%{}, &1, &2)}}))
-      ESCompileMacros.def_leaf_operator(DreaeQL.Operators.NotEquals, &(%{must: %{match: Map.put(%{}, &1, &2)}}))
+      ESCompileMacros.def_leaf_operator(DreaeQL.Operators.NotEquals, &(%{must_not: %{match: Map.put(%{}, &1, &2)}}))
       ESCompileMacros.def_leaf_operator(DreaeQL.Operators.LessThan, &(%{must: %{range: Map.put(%{}, &1, %{lt: &2})}}))
       ESCompileMacros.def_leaf_operator(DreaeQL.Operators.LessThanEquals, &(%{must: %{range: Map.put(%{}, &1, %{lt: &2})}}))
       ESCompileMacros.def_leaf_operator(DreaeQL.Operators.GreaterThan, &(%{must: %{range: Map.put(%{}, &1, %{lt: &2})}}))

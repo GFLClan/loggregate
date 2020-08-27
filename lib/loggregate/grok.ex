@@ -205,7 +205,7 @@ defmodule Loggregate.Grok do
     msg_patterns = Enum.map(list_grok_msg_patterns(), fn pattern ->
       case GrokEX.compile_predicate(pattern.pattern, patterns: patterns) do
         {:error, error} ->
-          Logger.error("Error compiling grok pattern", grok_error: error)
+          Logger.error("Error compiling grok pattern #{inspect(error)}", grok_error: error)
           :error
         {:ok, predicate} -> fn message ->
           case predicate.(message) do
